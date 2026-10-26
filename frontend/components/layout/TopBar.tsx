@@ -13,7 +13,9 @@ import {
   CreditCard,
   Wifi,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
+
 
 const PRESETS = [
   {
@@ -130,59 +132,65 @@ export function TopBar() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("revive_token");
+    localStorage.removeItem("revive_user");
+    window.location.href = "/login";
+  };
+
   return (
-    <header className="h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-6 sm:px-8 shadow-xs">
-      {/* Left: Environment & System Status */}
+    <header className="h-14 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-6 sm:px-8">
+      {/* Left: Environment & Status */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>PRODUCTION LIVE &bull; RAZORPAY AUTONOMOUS</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-50 text-zinc-800 border border-zinc-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span>Production</span>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-md">
-          <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Webhook Ingestion: <span className="font-semibold text-slate-700">Listening on :8000</span></span>
+        <div className="hidden lg:flex items-center gap-2 text-xs text-zinc-500">
+          <span>Webhook Ingestion: <span className="font-medium text-zinc-800">:8000</span></span>
         </div>
 
-        <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-md">
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-          <span>Guardrails: <span className="font-semibold text-blue-700">100% Deterministic</span></span>
+        <div className="hidden xl:flex items-center gap-1.5 text-xs text-zinc-500">
+          <span>&bull;</span>
+          <span>Guardrails: <span className="font-medium text-zinc-800">100% Deterministic</span></span>
         </div>
       </div>
 
-      {/* Right: Actions & Merchant Profile */}
+      {/* Right: Actions & Operator Identity */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIngestOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-98"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-medium transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
-          Simulate Payment Event
+          Simulate Event
         </button>
 
-        <div className="h-5 w-px bg-slate-200" />
+        <div className="h-4 w-px bg-zinc-200" />
 
-        {/* Merchant Identity & Sign Out */}
-        <div className="flex items-center gap-2.5 pl-1">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-xs shadow-2xs border border-slate-700">
+        {/* Operator Profile */}
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-zinc-100 border border-zinc-200 text-zinc-800 flex items-center justify-center font-semibold text-xs">
             AS
           </div>
           <div className="hidden sm:block text-left">
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-bold text-slate-900 leading-none">Aarav Sharma</span>
-              <span className="text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">FinOps</span>
-            </div>
-            <span className="text-[11px] text-slate-400 block mt-0.5">Tier 1 Merchant &bull; Live Telemetry</span>
+            <span className="text-xs font-semibold text-zinc-900 leading-none block">Aarav Sharma</span>
+            <span className="text-[10px] text-zinc-400">FinOps Lead</span>
           </div>
-          <a
-            href="/login"
-            title="Switch User or Sign In"
-            className="text-xs text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition-colors ml-1"
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleLogout}
+            title="Sign out of console"
+            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-300 bg-white px-2 py-1 rounded-md transition-colors ml-2"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+            <LogOut className="w-3 h-3 text-zinc-400" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </div>
+
 
 
       {/* Realistic Ingest Modal with Presets */}
