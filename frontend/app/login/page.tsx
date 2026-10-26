@@ -163,9 +163,10 @@ export default function LoginPage() {
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 bg-white border border-zinc-200/80 px-2 py-0.5 rounded-md">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>Production</span>
+          <span>Live</span>
         </div>
       </div>
+
 
       {/* Main Authentication Card */}
       <div className="w-full max-w-sm my-auto">

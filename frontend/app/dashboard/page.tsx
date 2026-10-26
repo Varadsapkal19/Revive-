@@ -356,10 +356,11 @@ export default function DashboardPage() {
               {(metrics?.recent_activity || []).length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-xs text-slate-400">
-                    <p className="font-semibold text-slate-600 mb-1">Production Database Initialized Cleanly</p>
+                    <p className="font-semibold text-slate-600 mb-1">Database Initialized Cleanly</p>
                     <span>No recovery cases recorded yet. Ingest a webhook or simulate a failure to trigger autonomous agent triage.</span>
                   </td>
                 </tr>
+
               ) : (
                 (metrics?.recent_activity || []).map((row) => (
 

@@ -144,8 +144,9 @@ export function TopBar() {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-50 text-zinc-800 border border-zinc-200">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>Production</span>
+          <span>Live System</span>
         </div>
+
 
         <div className="hidden lg:flex items-center gap-2 text-xs text-zinc-500">
           <span>Webhook Ingestion: <span className="font-medium text-zinc-800">:8000</span></span>
