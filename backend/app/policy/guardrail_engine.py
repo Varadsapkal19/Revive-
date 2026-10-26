@@ -1,84 +1,170 @@
-from pydantic import BaseModel
-from typing import List, Optional
+"""
+REVIVE Deterministic Guardrail Engine
+Zero-Hallucination Policy Verification Layer.
+AI models propose actions; this deterministic engine has absolute veto power.
+"""
 
-class CheckResult(BaseModel):
-    name: str
-    passed: bool
-    reason: str
+from typing import Any
+from app.schemas.domain import GuardrailCheckResult
 
-class GuardrailResult(BaseModel):
-    approved: bool
-    status: str  # AUTHORIZED | BLOCKED | HUMAN_REVIEW
-    checks: List[CheckResult]
+class PolicyViolationException(Exception):
+    def __init__(self, message: str, rule: str, details: dict[str, Any] | None = None):
+        super().__init__(message)
+        self.message = message
+        self.rule = rule
+        self.details = details or {}
 
 class GuardrailEngine:
-    """100% Deterministic Guardrail Policy Gate — No LLM bypass permitted."""
-    
-    def validate(
+    def __init__(
         self,
-        proposed_action: str,
-        discount_pct: float,
-        policy_max_discount: float,
-        max_outreach_per_day: int,
-        outreach_today: int,
-        allowed_channels: List[str],
-        max_autonomous_amount: float,
-        human_approval_threshold: float,
-        amount: float,
-        fatigue_score: float,
-        customer_consent: bool = True
-    ) -> GuardrailResult:
-        checks = []
-        approved = True
-        status = "AUTHORIZED"
+        max_discount_pct: float = 10.0,
+        max_retries: int = 3,
+        cooldown_hours: int = 8,
+        auto_whatsapp_enabled: bool = True,
+        auto_email_enabled: bool = True,
+        auto_upi_switch_enabled: bool = True,
+        human_escalation_threshold: float = 10000.0,
+    ):
+        self.max_discount_pct = float(max_discount_pct)
+        self.max_retries = int(max_retries)
+        self.cooldown_hours = int(cooldown_hours)
+        self.auto_whatsapp_enabled = auto_whatsapp_enabled
+        self.auto_email_enabled = auto_email_enabled
+        self.auto_upi_switch_enabled = auto_upi_switch_enabled
+        self.human_escalation_threshold = float(human_escalation_threshold)
 
-        # Check 1: Consent
-        if not customer_consent:
-            checks.append(CheckResult(name="CONSENT", passed=False, reason="Customer consent not given"))
-            approved = False
+    def evaluate_action(
+        self,
+        action: dict[str, Any],
+        context: dict[str, Any] | None = None
+    ) -> GuardrailCheckResult:
+        """
+        Evaluates a candidate recovery action against merchant policy rules.
+        Returns GuardrailCheckResult with pass/fail and breakdown of checked rules.
+        """
+        context = context or {}
+        violations: list[str] = []
+        checked_rules: list[dict[str, Any]] = []
 
-        # Check 2: Fatigue (Stop outreach at 90+)
-        if fatigue_score >= 90:
-            checks.append(CheckResult(name="FATIGUE", passed=False, reason=f"Fatigue score {fatigue_score:.1f}/100 exceeds threshold 90"))
-            approved = False
-        else:
-            checks.append(CheckResult(name="FATIGUE", passed=True, reason=f"Fatigue score {fatigue_score:.1f}/100 within safe limits"))
+        action_type = action.get("action_type", "")
+        discount_pct = float(action.get("discount_pct", 0.0))
+        channel = str(action.get("channel", "EMAIL")).upper()
+        current_retry_count = int(context.get("retry_count", 0))
+        hours_since_last_contact = float(context.get("hours_since_last_contact", 24.0))
+        root_cause = str(context.get("root_cause", "")).upper()
+        amount = float(context.get("amount", 0.0))
+        customer_tier = str(context.get("customer_tier", "STANDARD")).upper()
 
-        # Check 3: Frequency
-        if outreach_today >= max_outreach_per_day:
-            checks.append(CheckResult(name="FREQUENCY", passed=False, reason=f"Daily outreach limit {max_outreach_per_day} reached ({outreach_today} today)"))
-            approved = False
-        else:
-            checks.append(CheckResult(name="FREQUENCY", passed=True, reason=f"Outreach count {outreach_today}/{max_outreach_per_day} allowed"))
+        # Rule 1: Discount Cap Check
+        rule_discount_passed = discount_pct <= self.max_discount_pct
+        checked_rules.append({
+            "rule": "DISCOUNT_CAP",
+            "name": f"Maximum Discount <= {self.max_discount_pct}%",
+            "attempted": discount_pct,
+            "threshold": self.max_discount_pct,
+            "passed": rule_discount_passed,
+        })
+        if not rule_discount_passed:
+            violations.append(
+                f"Proposed discount {discount_pct}% exceeds merchant ceiling of {self.max_discount_pct}%"
+            )
 
-        # Check 4: Amount
-        if amount > human_approval_threshold:
-            checks.append(CheckResult(name="AMOUNT", passed=False, reason=f"Amount ₹{amount:,.0f} exceeds human approval threshold ₹{human_approval_threshold:,.0f}"))
-            status = "HUMAN_REVIEW"
-            approved = False
-        elif amount > max_autonomous_amount:
-            checks.append(CheckResult(name="AMOUNT", passed=False, reason=f"Amount ₹{amount:,.0f} exceeds autonomous limit ₹{max_autonomous_amount:,.0f}"))
-            status = "HUMAN_REVIEW"
-            approved = False
-        else:
-            checks.append(CheckResult(name="AMOUNT", passed=True, reason=f"Amount ₹{amount:,.0f} within autonomous limit ₹{max_autonomous_amount:,.0f}"))
+        # Rule 2: Retry Count Cap Check
+        if action_type in ("SMART_RETRY", "GATEWAY_RETRY"):
+            rule_retry_passed = current_retry_count < self.max_retries
+            checked_rules.append({
+                "rule": "RETRY_LIMIT",
+                "name": f"Maximum Retries < {self.max_retries}",
+                "attempted": current_retry_count + 1,
+                "threshold": self.max_retries,
+                "passed": rule_retry_passed,
+            })
+            if not rule_retry_passed:
+                violations.append(
+                    f"Transaction has already reached max retry attempts ({current_retry_count}/{self.max_retries})"
+                )
 
-        # Check 5: Discount limit
-        if discount_pct > policy_max_discount:
-            checks.append(CheckResult(name="DISCOUNT", passed=False, reason=f"Requested discount {discount_pct}% exceeds merchant max {policy_max_discount}%"))
-            approved = False
-        else:
-            checks.append(CheckResult(name="DISCOUNT", passed=True, reason=f"Discount {discount_pct}% within policy max {policy_max_discount}%"))
+        # Rule 3: Customer Notification Cooldown
+        if channel in ("EMAIL", "WHATSAPP", "SMS") and "LINK" in action_type:
+            rule_cooldown_passed = hours_since_last_contact >= self.cooldown_hours
+            checked_rules.append({
+                "rule": "COOLDOWN_WINDOW",
+                "name": f"Contact Cooldown >= {self.cooldown_hours} hours",
+                "attempted": hours_since_last_contact,
+                "threshold": self.cooldown_hours,
+                "passed": rule_cooldown_passed,
+            })
+            if not rule_cooldown_passed:
+                violations.append(
+                    f"Customer contacted {hours_since_last_contact:.1f}h ago; cooldown requires at least {self.cooldown_hours}h"
+                )
 
-        # Check 6: Channel permission
-        channel_name = proposed_action.lower()
-        if channel_name != "no_action" and channel_name not in [c.lower() for c in allowed_channels]:
-            checks.append(CheckResult(name="CHANNEL", passed=False, reason=f"Channel {proposed_action} not in merchant allowed list"))
-            approved = False
-        else:
-            checks.append(CheckResult(name="CHANNEL", passed=True, reason=f"Channel {proposed_action} permitted"))
+        # Rule 4: Hard Decline Lockout
+        if root_cause in ("FRAUD_ALERT", "STOLEN_CARD", "ACCOUNT_CLOSED"):
+            if action_type in ("SMART_RETRY", "INCENTIVIZED_OFFER"):
+                checked_rules.append({
+                    "rule": "HARD_DECLINE_LOCKOUT",
+                    "name": "Hard Decline Prohibits Automated Retry or Incentives",
+                    "attempted": action_type,
+                    "threshold": "HUMAN_ESCALATION_ONLY",
+                    "passed": False,
+                })
+                violations.append(
+                    f"Hard decline cause ({root_cause}) prohibits automated retries; requires manual audit."
+                )
 
-        if not approved and status != "HUMAN_REVIEW":
-            status = "BLOCKED"
+        # Rule 5: Channel Permission Check
+        if channel == "WHATSAPP" and not self.auto_whatsapp_enabled:
+            checked_rules.append({
+                "rule": "CHANNEL_WHATSAPP_ENABLED",
+                "name": "Merchant WhatsApp Outbound Enabled",
+                "attempted": channel,
+                "threshold": True,
+                "passed": False,
+            })
+            violations.append("Merchant has disabled automated WhatsApp notifications.")
 
-        return GuardrailResult(approved=approved, status=status, checks=checks)
+        if channel == "EMAIL" and not self.auto_email_enabled:
+            checked_rules.append({
+                "rule": "CHANNEL_EMAIL_ENABLED",
+                "name": "Merchant Email Outbound Enabled",
+                "attempted": channel,
+                "threshold": True,
+                "passed": False,
+            })
+            violations.append("Merchant has disabled automated Email notifications.")
+
+        # Rule 6: High-Value Human Escalation Advisory
+        is_high_value = (amount >= self.human_escalation_threshold) or (customer_tier == "ENTERPRISE")
+        if is_high_value and action_type not in ("HUMAN_ESCALATION", "ESCALATE_TO_SUPPORT"):
+            checked_rules.append({
+                "rule": "HIGH_VALUE_THRESHOLD",
+                "name": f"High Value (Amount >= {self.human_escalation_threshold} or Enterprise Tier)",
+                "attempted": amount,
+                "threshold": self.human_escalation_threshold,
+                "passed": True,  # Advisory rule
+                "advisory": "High value account: human escalation is strongly recommended"
+            })
+
+        return GuardrailCheckResult(
+            approved=len(violations) == 0,
+            violations=violations,
+            checked_rules=checked_rules
+        )
+
+    def validate_action(
+        self,
+        action: dict[str, Any],
+        context: dict[str, Any] | None = None
+    ) -> None:
+        """
+        Validates action and raises PolicyViolationException if blocked.
+        """
+        result = self.evaluate_action(action, context)
+        if not result.approved:
+            first_violation = result.violations[0]
+            raise PolicyViolationException(
+                message=f"Action '{action.get('action_type')}' blocked: {first_violation}",
+                rule="GUARDRAIL_POLICY_VIOLATION",
+                details={"violations": result.violations}
+            )

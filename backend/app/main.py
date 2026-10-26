@@ -1,41 +1,40 @@
+"""
+REVIVE FastAPI Main Application Entrypoint
+"""
+
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+
 from app.config import settings
-from app.api import events, risk, cases, simulator, policies, audit, metrics, webhooks, experiments
+from app.database import engine, Base, SessionLocal
+from app.api.endpoints import router as api_router
+from app.services.services import SeederService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
+    # Startup: Provision tables and seed initial demo dataset
+    Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        SeederService.seed_initial_demo_data(db)
     yield
+    # Shutdown
 
-app = FastAPI(title="REVIVE Backend API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(
+    title="REVIVE — Revenue Recovery Intelligence & Value Engine",
+    description="Autonomous closed-loop revenue recovery intelligence layer for the Razorpay ecosystem.",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS if settings.BACKEND_CORS_ORIGINS else ["*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(events.router)
-app.include_router(risk.router)
-app.include_router(cases.router)
-app.include_router(simulator.router)
-app.include_router(policies.router)
-app.include_router(audit.router)
-app.include_router(metrics.router)
-app.include_router(webhooks.router)
-app.include_router(experiments.router)
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "version": "1.0.0", "env": settings.APP_ENV}
-
-@app.post("/api/admin/clear-db")
-async def clear_database():
-    from app.database import reset_db
-    return reset_db()
-
-
+# Mount all API endpoints
+app.include_router(api_router)

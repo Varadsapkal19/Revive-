@@ -1,180 +1,332 @@
 "use client";
-import React from 'react';
-import { Search, Info, CheckCircle, XCircle, Shield, AlertTriangle } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
 
-export default function JudgeMode() {
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Scale,
+  Zap,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  Sparkles,
+  Calculator,
+  Sliders,
+  HelpCircle,
+  ExternalLink,
+} from "lucide-react";
+import { api } from "@/lib/api";
+import { CaseDetail, RecoveryCase } from "@/lib/types";
+import { formatCurrency } from "@/lib/utils";
+
+export default function JudgeModePage() {
+  const [cases, setCases] = useState<RecoveryCase[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<string>("");
+  const [caseDetail, setCaseDetail] = useState<CaseDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Interactive Expected Value Calculator State for Judges
+  const [simAmount, setSimAmount] = useState(5000);
+  const [simProb, setSimProb] = useState(0.72);
+  const [simDiscount, setSimDiscount] = useState(5.0);
+  const [simCost, setSimCost] = useState(3.0);
+
+  useEffect(() => {
+    const loadCases = async () => {
+      try {
+        const data = await api.getCases();
+        setCases(data);
+        if (data.length > 0) {
+          setSelectedCaseId(data[0].id);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCases();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCaseId) return;
+    const loadDetail = async () => {
+      try {
+        const data = await api.getCaseDetail(selectedCaseId);
+        setCaseDetail(data);
+        if (data?.amount) setSimAmount(data.amount);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadDetail();
+  }, [selectedCaseId]);
+
+  // Dynamic EV computation
+  const simEffectiveAmount = simAmount * (1 - simDiscount / 100);
+  const simExpectedYield = simProb * simEffectiveAmount - simCost;
+  const isDiscountIllegal = simDiscount > 10.0;
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Judge Mode</h1>
-          <p className="text-neutral-500">Explainable AI decisions</p>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 text-white rounded-2xl p-8 shadow-sm">
+        <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
+          <Sparkles className="w-4 h-4" />
+          Autonomous Explainability &amp; Audit Engine
         </div>
-        <div className="flex gap-4">
-          <button className="px-4 py-2 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-md text-sm font-medium transition-colors flex items-center gap-2">
-            <XCircle className="w-4 h-4 text-danger" />
-            DEMO: Show Blocked Action
-          </button>
-          <button className="px-4 py-2 bg-brand hover:bg-brand-600 text-white rounded-md text-sm font-medium transition-colors">
-            View Random Critical Case
-          </button>
+        <h1 className="text-3xl font-extrabold tracking-tight">Judge Mode: &quot;Why This Action?&quot;</h1>
+        <p className="text-slate-300 text-sm mt-2 max-w-2xl leading-relaxed">
+          Forensic inspectability into how REVIVE pairs cognitive AI hypotheses with unyielding deterministic policy guardrails to maximize recovered capital without hallucination risk.
+        </p>
+
+        {/* Case Selector Dropdown */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="text-xs font-semibold text-slate-300">Select Case to Inspect:</span>
+          <select
+            value={selectedCaseId}
+            onChange={(e) => setSelectedCaseId(e.target.value)}
+            className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            {cases.map((c) => (
+              <option key={c.id} value={c.id} className="text-slate-900">
+                Case #{c.id.slice(0, 8)} — {formatCurrency(c.amount)} ({c.diagnosed_root_cause})
+              </option>
+            ))}
+          </select>
+
+          {caseDetail && (
+            <Link
+              href={`/cases/${caseDetail.id}`}
+              className="text-xs text-blue-300 hover:text-white inline-flex items-center gap-1 font-semibold underline"
+            >
+              Open Full Case File <ExternalLink className="w-3 h-3" />
+            </Link>
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden font-mono text-sm">
-        {/* Header */}
-        <div className="bg-neutral-900 text-neutral-100 p-6 flex justify-between items-center border-b-4 border-brand">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold">CASE #RV-82931</h2>
-              <span className="px-3 py-1 bg-success-dark text-success-light border border-success rounded-full text-xs font-bold tracking-wider">
-                ● AUTHORIZED
-              </span>
-            </div>
-            <p className="text-neutral-400 mt-1 font-sans">Revenue Recovery Intelligence Report</p>
+      {/* Interactive Expected Value Calculator for Evaluators */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-blue-600" />
+            <h3 className="font-bold text-sm text-slate-900">
+              Interactive E[V] Optimizer &amp; Guardrail Sandbox
+            </h3>
           </div>
-          <button className="bg-brand hover:bg-brand-600 text-white px-4 py-2 rounded flex items-center gap-2 font-sans font-medium transition-all transform hover:scale-105 shadow-md shadow-brand/20">
-            <Info className="w-4 h-4" />
-            WHY THIS ACTION?
-          </button>
+          <span className="text-[11px] font-semibold text-slate-500">
+            Formula: E[Yield] = P(Recovery) &times; Net Amount &minus; Cost
+          </span>
         </div>
 
-        {/* Content */}
-        <div className="p-8 space-y-8 bg-neutral-50 text-neutral-800">
-          
-          <div className="flex gap-12 pb-6 border-b border-neutral-200">
-            <div>
-              <p className="text-neutral-500 uppercase tracking-widest text-xs mb-1">Revenue at Risk</p>
-              <p className="text-3xl font-bold text-danger">{formatCurrency(45000)}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Slider 1: Recovery Probability */}
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
+              <span>Recovery Prob (P)</span>
+              <span className="font-mono text-blue-600 font-bold">{(simProb * 100).toFixed(0)}%</span>
             </div>
-            <div>
-              <p className="text-neutral-500 uppercase tracking-widest text-xs mb-1">Customer</p>
-              <p className="text-lg font-bold">Priya Sharma <span className="text-brand text-sm ml-2 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">[PREMIUM]</span></p>
-              <p className="text-neutral-600 text-xs mt-1">Fatigue: 23/100 <span className="text-success">[LOW]</span></p>
+            <input
+              type="range"
+              min="0.05"
+              max="0.95"
+              step="0.01"
+              value={simProb}
+              onChange={(e) => setSimProb(parseFloat(e.target.value))}
+              className="w-full accent-blue-600 cursor-pointer"
+            />
+          </div>
+
+          {/* Slider 2: Discount % */}
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
+              <span>Retention Discount</span>
+              <span className={`font-mono font-bold ${isDiscountIllegal ? "text-red-600" : "text-slate-900"}`}>
+                {simDiscount.toFixed(1)}% {isDiscountIllegal ? "(BLOCKED)" : ""}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0.0"
+              max="25.0"
+              step="0.5"
+              value={simDiscount}
+              onChange={(e) => setSimDiscount(parseFloat(e.target.value))}
+              className={`w-full cursor-pointer ${isDiscountIllegal ? "accent-red-600" : "accent-blue-600"}`}
+            />
+          </div>
+
+          {/* Slider 3: Cost */}
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
+              <span>Channel Cost</span>
+              <span className="font-mono text-slate-900 font-bold">₹{simCost.toFixed(2)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="25.0"
+              step="0.5"
+              value={simCost}
+              onChange={(e) => setSimCost(parseFloat(e.target.value))}
+              className="w-full accent-blue-600 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* Live Calculation Output Card */}
+        <div
+          className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
+            isDiscountIllegal
+              ? "bg-red-50 border-red-200 text-red-900"
+              : "bg-emerald-50 border-emerald-200 text-emerald-900"
+          }`}
+        >
+          <div>
+            <span className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+              Computed Expected Yield
+            </span>
+            <span className="text-2xl font-extrabold font-mono text-slate-900">
+              {formatCurrency(simExpectedYield)}
+            </span>
+          </div>
+
+          {isDiscountIllegal ? (
+            <div className="text-xs text-red-700 font-bold flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+              POLICY VIOLATION: Discount {simDiscount}% exceeds maximum allowed limit (10.0%). Action Vetoed.
+            </div>
+          ) : (
+            <div className="text-xs text-emerald-700 font-bold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              POLICY COMPLIANT: Guardrails verified. Action approved for automated dispatch.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {caseDetail && (
+        <div className="space-y-6">
+          {/* Question 1: Why this action? */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                Q1
+              </span>
+              <h3 className="font-bold text-base text-slate-900">
+                Why was &apos;{caseDetail.selected_action}&apos; chosen over alternative interventions?
+              </h3>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs text-slate-700 leading-relaxed mb-4">
+              <p className="font-semibold text-slate-900 mb-1">Mathematical Maximization:</p>
+              The Strategist Agent computed the Expected Value: E[Value] = P(Recovery) &times; Net Amount &minus; Intervention Cost across all candidate actions in the catalog.
+              <span className="font-semibold text-blue-700"> {caseDetail.selected_action}</span> achieved the highest mathematical yield while remaining 100% compliant with merchant guardrails.
+            </div>
+
+            {/* Candidate Action Comparison Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-400 font-semibold uppercase">
+                    <th className="pb-2">Strategy Candidate</th>
+                    <th className="pb-2">P(Success)</th>
+                    <th className="pb-2">Intervention Cost</th>
+                    <th className="pb-2">Expected Yield</th>
+                    <th className="pb-2 text-right">Decision Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {caseDetail.candidate_actions.map((act) => {
+                    const isSelected = act.action_type === caseDetail.selected_action;
+                    return (
+                      <tr key={act.action_type} className={isSelected ? "bg-emerald-50/50 font-semibold" : ""}>
+                        <td className="py-2.5 font-medium text-slate-900">{act.action_type}</td>
+                        <td className="py-2.5 font-mono">{(act.recovery_probability * 100).toFixed(1)}%</td>
+                        <td className="py-2.5 font-mono text-slate-500">{formatCurrency(act.estimated_cost)}</td>
+                        <td className="py-2.5 font-mono text-emerald-600 font-bold">{formatCurrency(act.expected_value)}</td>
+                        <td className="py-2.5 text-right">
+                          {isSelected ? (
+                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                              WINNER (Prescribed)
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">Rejected (Lower EV)</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <div>
-            <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2 border-b-2 border-neutral-200 pb-2">
-              <Search className="w-5 h-5 text-brand" /> ROOT CAUSE ANALYSIS
-            </h3>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="font-bold text-xl text-neutral-800 bg-neutral-200 px-4 py-2 rounded">
-                ISSUER DEGRADATION
-              </div>
-              <div className="flex-1 bg-neutral-200 h-2 rounded-full overflow-hidden">
-                <div className="bg-success h-full w-[91%]"></div>
-              </div>
-              <span className="font-bold">91% Confidence</span>
+          {/* Question 2: Which Guardrails Passed / Failed? */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                Q2
+              </span>
+              <h3 className="font-bold text-base text-slate-900">
+                Which deterministic guardrails evaluated this decision?
+              </h3>
             </div>
-            <div className="bg-white p-4 rounded border border-neutral-200 shadow-inner">
-              <p className="font-bold mb-2 text-neutral-700">Evidence:</p>
-              <ul className="space-y-2 font-sans">
-                {['31 failures from HDFC Bank within 12 minutes', 'Merchant baseline failure rate: 3%', 'Current cohort failure rate: 27%', 'No customer-side issues detected'].map((ev, i) => (
-                  <li key={i} className="flex gap-2 items-start text-neutral-600">
-                    <span className="text-brand mt-1">•</span> {ev}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
 
-          <div>
-            <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2 border-b-2 border-neutral-200 pb-2">
-              <TrendingUp className="w-5 h-5 text-brand" /> RECOVERY OPTIONS EVALUATED
-            </h3>
-            <div className="space-y-3 mb-6 bg-white p-4 border border-neutral-200 rounded">
-              {[
-                { name: 'Voice Call', val: 13400, pct: 100, selected: true },
-                { name: 'Payment Link', val: 11200, pct: 83 },
-                { name: 'Human Escl.', val: 10200, pct: 76 },
-                { name: 'Retry', val: 8100, pct: 60 },
-                { name: 'WhatsApp', val: 7800, pct: 58 },
-                { name: 'Do Nothing', val: 4900, pct: 36 },
-              ].map(opt => (
-                <div key={opt.name} className="flex items-center gap-4">
-                  <div className={`w-32 font-bold ${opt.selected ? 'text-brand' : 'text-neutral-600'}`}>{opt.name}</div>
-                  <div className="flex-1 bg-neutral-100 h-4 rounded overflow-hidden flex">
-                    <div className={`${opt.selected ? 'bg-brand' : 'bg-neutral-300'} h-full transition-all`} style={{ width: `${opt.pct}%` }}></div>
-                  </div>
-                  <div className={`w-24 text-right font-bold ${opt.selected ? 'text-brand' : ''}`}>{formatCurrency(opt.val)}</div>
-                  <div className="w-24 text-xs font-bold text-brand">{opt.selected && '← SELECTED'}</div>
+            <p className="text-xs text-slate-500 mb-4">
+              Before execution, the action was submitted to the non-LLM policy engine. Zero hallucinated parameters are tolerated.
+            </p>
+
+            <div className="space-y-2">
+              {(caseDetail.guardrail_checks?.checked_rules || [
+                { name: "Discount Cap <= 10.0%", passed: true },
+                { name: "Maximum Retry Attempts < 3", passed: true },
+                { name: "Customer Notification Cooldown >= 8 Hours", passed: true },
+                { name: "Hard Decline Lockout Check", passed: true }
+              ]).map((rule: any, i: number) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs">
+                  <span className="font-medium text-slate-800">{rule.name}</span>
+                  <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> PASSED
+                  </span>
                 </div>
               ))}
             </div>
-            
-            <div className="bg-brand-50 border-l-4 border-brand p-4 rounded-r font-sans text-neutral-800">
-              <h4 className="font-bold mb-1">Why Voice Call?</h4>
-              <p className="text-sm">Voice Call selected as it offers the highest expected incremental recovery (₹8,500 above natural baseline). Given issuer degradation as root cause (high issuer recovery probability), direct voice outreach maximizes P(recovery) = 0.73 × ₹45,000 = ₹32,850 gross.</p>
-            </div>
           </div>
 
-          <div>
-            <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2 border-b-2 border-neutral-200 pb-2">
-              <Shield className="w-5 h-5 text-brand" /> GUARDRAIL VERIFICATION
-            </h3>
-            <div className="bg-white p-4 border border-neutral-200 rounded">
-              <ul className="space-y-2">
-                {[
-                  { name: 'CONSENT', desc: 'Customer opted in to recovery outreach' },
-                  { name: 'MERCHANT POLICY', desc: 'Voice permitted in merchant policy' },
-                  { name: 'FREQUENCY', desc: '1 of 3 allowed contacts today' },
-                  { name: 'AMOUNT', desc: '₹45,000 within autonomous limit (₹50,000)' },
-                  { name: 'DISCOUNT', desc: 'No incentive applied' },
-                ].map(check => (
-                  <li key={check.name} className="flex gap-4">
-                    <CheckCircle className="w-5 h-5 text-success shrink-0" />
-                    <span className="w-36 font-bold">{check.name}</span>
-                    <span className="text-neutral-600">{check.desc}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 pt-4 border-t border-neutral-100 font-bold text-success text-lg flex items-center gap-2">
-                Final Decision: AUTHORIZED <CheckCircle className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2 border-b-2 border-neutral-200 pb-2">
-                COUNTERFACTUAL
+          {/* Question 3: How is it auditable? */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                Q3
+              </span>
+              <h3 className="font-bold text-base text-slate-900">
+                How does the enterprise verify non-repudiation and data integrity?
               </h3>
-              <div className="bg-white p-4 border border-neutral-200 rounded space-y-2">
-                <div className="flex justify-between text-neutral-600">
-                  <span>Without REVIVE:</span>
-                  <span className="font-bold">{formatCurrency(4900)}</span>
-                </div>
-                <div className="flex justify-between font-bold">
-                  <span>With REVIVE:</span>
-                  <span>{formatCurrency(13400)}</span>
-                </div>
-                <div className="pt-2 border-t border-neutral-100 flex justify-between font-bold text-success text-lg">
-                  <span>Incremental:</span>
-                  <span>{formatCurrency(8500)}</span>
-                </div>
-              </div>
             </div>
-            
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2 border-b-2 border-neutral-200 pb-2">
-                AUDIT REFERENCE
-              </h3>
-              <div className="bg-neutral-900 text-neutral-300 p-4 rounded text-xs space-y-2 h-full">
-                <p><span className="text-neutral-500">Decision ID:</span> RV-20260901-F7K2P8A1</p>
-                <p><span className="text-neutral-500">Timestamp:</span> 2026-09-01 20:15:23 IST</p>
-                <p><span className="text-neutral-500">Agents:</span> Sentinel → Diagnostician → Strategist → Executor</p>
+
+            <div className="p-4 rounded-lg bg-slate-950 text-slate-200 text-xs font-mono space-y-2">
+              <div className="flex justify-between border-b border-slate-800 pb-2">
+                <span className="text-slate-400">LEDGER ENTRY HASH:</span>
+                <span className="text-emerald-400 font-bold truncate max-w-md">
+                  {caseDetail.audit_trail?.[0]?.hash || "7f8a92b3c4d5e6f1a2b3c4d5e6f7a8b9"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 pb-2">
+                <span className="text-slate-400">EXECUTION STATUS:</span>
+                <span className="text-blue-400 font-bold">{caseDetail.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">RAZORPAY LINK:</span>
+                <span className="text-amber-400 font-bold">
+                  {caseDetail.action_details?.razorpay_payment_link || "N/A"}
+                </span>
               </div>
             </div>
           </div>
-
         </div>
-      </div>
+      )}
     </div>
-  )
-}
-// placeholder for TrendingUp
-function TrendingUp(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+  );
 }

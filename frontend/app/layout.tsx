@@ -1,22 +1,23 @@
-import './globals.css'
-import { AppLayout } from '@/components/layout/AppLayout'
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
+import "./globals.css";
+import { ShellLayout } from "@/components/layout/ShellLayout";
 
 export const metadata: Metadata = {
-  title: 'REVIVE — Revenue Recovery Intelligence',
-  description: 'Autonomous Revenue Recovery Intelligence & Value Engine',
-}
+  title: "REVIVE — Revenue Recovery Intelligence & Value Engine",
+  description: "Autonomous payment recovery intelligence layer for the Razorpay Buildathon.",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased bg-neutral-50">
-        <AppLayout>{children}</AppLayout>
+      <body className="bg-slate-50 min-h-screen text-slate-900 antialiased">
+        <ShellLayout>{children}</ShellLayout>
       </body>
     </html>
-  )
+  );
 }
+

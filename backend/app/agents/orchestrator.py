@@ -1,99 +1,91 @@
-from typing import Dict, Any
-from app.agents.sentinel import SentinelAgent
-from app.agents.diagnostician import DiagnosticianAgent
-from app.agents.strategist import StrategistAgent
-from app.agents.executor import ExecutorAgent
-from app.agents.auditor import AuditorAgent
-from app.services.policy_service import PolicyService
-from app.services.fatigue_service import FatigueService
+"""
+REVIVE Multi-Agent Orchestrator
+Coordinates Sentinel -> Diagnostician -> Strategist -> Guardrail Gate -> Executor -> Auditor.
+"""
 
-class Orchestrator:
-    """REVIVE Orchestrator: Connects Sentinel → Diagnostician → Strategist → Policy Engine → Executor → Auditor."""
-    
-    def __init__(self):
-        self.sentinel = SentinelAgent()
-        self.diagnostician = DiagnosticianAgent()
-        self.strategist = StrategistAgent()
-        self.executor = ExecutorAgent()
-        self.auditor = AuditorAgent()
-        self.policy_service = PolicyService()
+import logging
+from typing import Any
+from app.agents.state import RecoveryAgentState
+from app.agents.sentinel import sentinel_agent
+from app.agents.diagnostician import diagnostician_agent
+from app.agents.strategist import strategist_agent
+from app.agents.executor import executor_agent
+from app.agents.auditor import auditor_agent
+from app.policy.guardrail_engine import GuardrailEngine
 
-    def process(self, event: Dict[str, Any], merchant_policy: Dict[str, Any] = None) -> Dict[str, Any]:
-        if merchant_policy is None:
-            merchant_policy = {
-                "max_discount_pct": 10.0,
-                "max_outreach_per_day": 3,
-                "allowed_channels": ["Retry", "Payment Link", "WhatsApp", "Voice Call", "Human Escalation"],
-                "max_autonomous_amount": 50000.0,
-                "human_approval_threshold": 100000.0,
-            }
-            
-        # Step 1: Sentinel Risk Assessment
-        sentinel_res = self.sentinel.process_event(event)
-        
-        # Step 2: Diagnostician Root Cause Analysis
-        diag_res = self.diagnostician.diagnose(event)
-        
-        # Step 3: Fatigue calculation
-        fatigue_score = FatigueService.calculate_fatigue(
-            outreach_last_24h=event.get("outreach_last_24h", 1),
-            outreach_last_7d=event.get("outreach_last_7d", 2),
-            ignored_count=event.get("ignored_count", 0),
-            last_contact_hours_ago=event.get("last_contact_hours_ago", 24.0)
-        )
-        
-        # Step 4: Strategist Action Ranking & EV calculation
-        strat_res = self.strategist.evaluate(
-            amount=sentinel_res["revenue_at_risk"],
-            root_cause=diag_res["root_cause"],
-            fatigue_score=fatigue_score
-        )
-        
-        # Step 5: Deterministic Policy Check
-        guardrail_res = self.policy_service.check_policy(
-            proposed_action=strat_res["selected_action"],
-            discount_pct=event.get("requested_discount_pct", 0.0),
-            merchant_policy=merchant_policy,
-            outreach_today=event.get("outreach_today", 1),
-            amount=sentinel_res["revenue_at_risk"],
-            fatigue_score=fatigue_score,
-            customer_consent=event.get("customer_consent", True)
-        )
-        
-        # Step 6: Executor
-        exec_res = self.executor.execute(strat_res["selected_action"], guardrail_res)
-        
-        # Step 7: Auditor Logging
-        audit_res = self.auditor.log(
-            case_id=sentinel_res["case_id"],
-            agent_name="Strategist",
-            action=strat_res["selected_action"],
-            reason=f"Highest expected incremental recovery (EV: INR {strat_res['expected_recovery']:,.2f})",
-            evidence=diag_res["evidence"],
-            policy_checks=[c.dict() for c in guardrail_res.checks],
-            execution_result=exec_res["status"]
-        )
-        
-        return {
-            "case_id": sentinel_res["case_id"],
-            "decision_id": audit_res["decision_id"],
-            "risk_score": sentinel_res["risk_score"],
-            "priority": sentinel_res["priority"],
-            "revenue_at_risk": sentinel_res["revenue_at_risk"],
-            "root_cause": diag_res["root_cause"],
-            "root_cause_confidence": diag_res["confidence"],
-            "root_cause_evidence": diag_res["evidence"],
-            "fatigue_score": fatigue_score,
-            "selected_action": strat_res["selected_action"],
-            "expected_recovery": strat_res["expected_recovery"],
-            "natural_recovery_estimate": strat_res["natural_recovery_estimate"],
-            "expected_incremental_recovery": strat_res["expected_incremental_recovery"],
-            "action_ranking": strat_res["candidate_actions"],
-            "guardrail_status": guardrail_res.status,
-            "guardrail_approved": guardrail_res.approved,
-            "guardrail_checks": [c.dict() for c in guardrail_res.checks],
-            "execution": exec_res,
-            "audit_log": audit_res
+logger = logging.getLogger("revive.orchestrator")
+
+class AgentOrchestrator:
+    def __init__(self, guardrail_engine: GuardrailEngine | None = None):
+        self.guardrail_engine = guardrail_engine or GuardrailEngine()
+
+    async def run_pipeline(self, initial_state: RecoveryAgentState) -> RecoveryAgentState:
+        """
+        Executes the full recovery cycle across all 5 agents and deterministic guardrails.
+        """
+        state = initial_state
+
+        # 1. Sentinel Triage
+        state = sentinel_agent.process(state)
+
+        # 2. Diagnostician Root Cause Analysis
+        state = await diagnostician_agent.process(state)
+
+        # 3. Strategist Expected Value Ranking
+        state = strategist_agent.process(state)
+
+        # 4. Deterministic Guardrail Evaluation Gate
+        # Attempt top candidate actions in rank order until one passes guardrails
+        candidates = state.get("candidate_actions", [])
+        chosen_action = None
+        guardrail_result = None
+
+        context = {
+            "retry_count": state.get("retry_count", 0),
+            "hours_since_last_contact": state.get("hours_since_last_contact", 24.0),
+            "root_cause": state.get("diagnosed_root_cause", ""),
+            "amount": state.get("amount", 0.0),
+            "customer_tier": state.get("customer_tier", "STANDARD")
         }
 
-REVIVEOrchestrator = Orchestrator
+        for candidate in candidates:
+            eval_res = self.guardrail_engine.evaluate_action(candidate, context)
+            if eval_res.approved:
+                chosen_action = candidate
+                guardrail_result = eval_res
+                break
+            else:
+                logger.info(
+                    f"Candidate action '{candidate.get('action_type')}' vetoed by guardrails: "
+                    f"{eval_res.violations}"
+                )
+
+        if chosen_action is None:
+            # Fallback to safe HUMAN_ESCALATION if all automated interventions fail guardrails
+            fallback = {
+                "action_type": "HUMAN_ESCALATION",
+                "expected_value": 0.0,
+                "recovery_probability": 0.35,
+                "estimated_cost": 50.0,
+                "discount_pct": 0.0,
+                "channel": "INTERNAL",
+                "schedule_delay_hours": 0,
+                "rationale": "Automated actions vetoed by merchant policy; routing for manual FinOps review."
+            }
+            chosen_action = fallback
+            guardrail_result = self.guardrail_engine.evaluate_action(fallback, context)
+
+        state["selected_action"] = chosen_action
+        state["guardrail_approved"] = guardrail_result.approved if guardrail_result else False
+        state["guardrail_violations"] = guardrail_result.violations if guardrail_result else []
+        state["guardrail_checks"] = guardrail_result.checked_rules if guardrail_result else []
+
+        # 5. Executor Governed Dispatch
+        state = await executor_agent.process(state)
+
+        # 6. Auditor Immutable Cryptographic Logging
+        state = auditor_agent.process(state)
+
+        return state
+
+agent_orchestrator = AgentOrchestrator()

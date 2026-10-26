@@ -1,80 +1,94 @@
-'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard, AlertTriangle, FileText, Play,
-  FlaskConical, Shield, BookOpen, Scale
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+"use client";
 
-const navItems = [
-  { name: 'Overview',        href: '/dashboard',      icon: LayoutDashboard },
-  { name: 'Revenue Risk',    href: '/revenue-risk',   icon: AlertTriangle },
-  { name: 'Recovery Cases',  href: '/cases',          icon: FileText },
-  { name: 'Simulator',       href: '/simulator',      icon: Play },
-  { name: 'Experiments',     href: '/experiments',    icon: FlaskConical },
-  { name: 'Policies',        href: '/policies',       icon: Shield },
-  { name: 'Audit Log',       href: '/audit',          icon: BookOpen },
-  { name: 'Judge Mode',      href: '/judge-mode',     icon: Scale },
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  BarChart3,
+  Radar,
+  Briefcase,
+  PlayCircle,
+  FlaskConical,
+  ShieldCheck,
+  FileText,
+  Scale,
+  Sparkles,
+  Layers,
+  KeyRound,
+} from "lucide-react";
+
+const navigation = [
+  { name: "Revenue War Room", href: "/dashboard", icon: BarChart3 },
+  { name: "Risk Radar", href: "/revenue-risk", icon: Radar },
+  { name: "Recovery Cases", href: "/cases", icon: Briefcase },
+  { name: "Batch Simulator", href: "/simulator", icon: PlayCircle },
+  { name: "A/B Experiments", href: "/experiments", icon: FlaskConical },
+  { name: "Policy Center", href: "/policies", icon: ShieldCheck },
+  { name: "Audit Ledger", href: "/audit", icon: FileText },
+  { name: "Judge Mode", href: "/judge-mode", icon: Scale, badge: "Why This Action?" },
+  { name: "Operator Login / SSO", href: "/login", icon: KeyRound },
 ];
+
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="w-60 bg-neutral-900 h-screen flex flex-col text-neutral-200 shrink-0">
-      {/* Logo */}
-      <div className="p-4 flex items-center gap-3 border-b border-neutral-800">
-        <img
-          src="/logo.jpg"
-          alt="REVIVE Logo"
-          className="w-10 h-10 object-contain rounded-lg shadow-md border border-neutral-800"
-        />
+    <aside className="w-64 border-r border-slate-200 bg-white flex flex-col h-screen fixed left-0 top-0 z-30">
+      {/* Brand Header */}
+      <div className="h-16 flex items-center px-6 border-b border-slate-200 gap-3">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-slate-900 to-blue-600 flex items-center justify-center text-white shadow-sm">
+          <Sparkles className="w-5 h-5" />
+        </div>
         <div>
-          <h1 className="font-bold text-white text-base tracking-tight leading-none">REVIVE</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">Recovery Intelligence</p>
+          <span className="font-bold text-slate-900 tracking-tight text-lg">REVIVE</span>
+          <span className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wider">
+            Razorpay Intel Layer
+          </span>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-3 overflow-y-auto">
-        <p className="px-4 py-2 text-[10px] uppercase tracking-widest text-neutral-600 font-semibold">
-          Navigation
-        </p>
-        <ul className="space-y-0.5 px-2">
-          {navItems.map(item => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            return (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
-                    isActive
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100'
-                  )}
-                >
-                  <item.icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-neutral-500')} />
-                  {item.name}
-                  {item.name === 'Judge Mode' && (
-                    <span className="ml-auto text-[10px] bg-brand-700 text-brand-100 px-1.5 py-0.5 rounded font-bold tracking-wide">
-                      ⭐
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      {/* Navigation Links */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          Intelligence & Operations
+        </div>
+        {navigation.map((item) => {
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? "bg-blue-50 text-blue-700 font-semibold shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Icon className={`w-4 h-4 ${isActive ? "text-blue-600" : "text-slate-400"}`} />
+                <span>{item.name}</span>
+              </div>
+              {item.badge && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-neutral-800">
-        <div className="text-xs text-neutral-600 space-y-1">
-          <p className="font-mono">v1.0.0 · Production</p>
+      {/* Guardrail Invariant Footer Badge */}
+      <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center gap-2 mb-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span className="text-xs font-semibold text-slate-900">Deterministic Guardrails</span>
         </div>
+        <p className="text-[11px] text-slate-500 leading-tight">
+          Strict policy invariants enforced. 0% AI hallucination tolerance.
+        </p>
       </div>
-    </div>
+    </aside>
   );
 }

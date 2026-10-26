@@ -1,93 +1,162 @@
 export interface DashboardMetrics {
-  revenue_at_risk: number
-  potentially_recoverable: number
-  recovered: number
-  incremental_recovery: number
-  recovery_rate: number
-  total_interventions: number
-  successful_interventions: number
-  blocked_interventions: number
-  human_escalations: number
-  incremental_per_intervention: number
+  total_arr_at_risk: number;
+  total_arr_recovered: number;
+  overall_recovery_rate: number;
+  active_cases_count: number;
+  avg_resolution_hours: number;
+  policy_compliance_rate: number;
+  uplift_vs_baseline_pct: number;
+  monthly_trend: Array<{ month: string; at_risk: number; recovered: number; rate: number }>;
+  root_cause_distribution: Array<{ name: string; value: number }>;
+  recent_activity: Array<{
+    id: string;
+    amount: number;
+    cause: string;
+    action: string;
+    status: string;
+    risk: number;
+    time: string;
+  }>;
 }
 
-export interface ActionRanking {
-  action: string
-  expected_value: number
-  probability: number
-  is_selected: boolean
+export interface CandidateAction {
+  action_type: string;
+  expected_value: number;
+  recovery_probability: number;
+  estimated_cost: number;
+  discount_pct: number;
+  channel: string;
+  schedule_delay_hours: number;
+  rationale: string;
 }
 
-export interface GuardrailCheck {
-  name: string
-  passed: boolean
-  reason: string
+export interface GuardrailChecks {
+  approved: boolean;
+  violations: string[];
+  checked_rules: Array<{
+    rule?: string;
+    name: string;
+    attempted?: any;
+    threshold?: any;
+    passed: boolean;
+    advisory?: string;
+  }>;
 }
 
 export interface RecoveryCase {
-  id: string
-  customer_id: string
-  amount: number
-  risk_score: number
-  priority: 'critical' | 'high' | 'medium' | 'low'
-  root_cause: string
-  root_cause_confidence: number
-  root_cause_evidence: string[]
-  recoverable_amount: number
-  selected_action: string
-  expected_recovery: number
-  natural_recovery_estimate: number
-  expected_incremental_recovery: number
-  actual_recovery?: number
-  actual_incremental_recovery?: number
-  fatigue_score: number
-  status: string
-  guardrail_checks: GuardrailCheck[]
-  action_ranking: ActionRanking[]
-  created_at: string
+  id: string;
+  amount: number;
+  currency: string;
+  risk_score: number;
+  urgency: string;
+  diagnosed_root_cause: string;
+  diagnostic_confidence?: number;
+  status: string;
+  selected_action?: string;
+  recovered_amount: number;
+  created_at: string;
 }
 
-export interface FunnelStep {
-  label: string
-  count: number
-  w: number
-}
-
-export interface SimulatorResult {
-  total_events: number
-  revenue_at_risk: number
-  potentially_recoverable: number
-  revive_recovery: number
-  incremental_recovery: number
-  recovery_rate: number
-  interventions_count: number
-  blocked_count: number
-  human_escalations: number
-  by_action: Record<string, number>
-  by_root_cause: Record<string, number>
-  funnel: FunnelStep[]
+export interface CaseDetail extends RecoveryCase {
+  customer_name?: string;
+  customer_email?: string;
+  customer_tier?: string;
+  diagnostic_reasoning?: string;
+  action_details?: {
+    action_type?: string;
+    razorpay_payment_link?: string;
+    payment_link_id?: string;
+    channel?: string;
+    status?: string;
+    mock?: boolean;
+    scheduled_retry_delay_hours?: number;
+  };
+  retry_count: number;
+  candidate_actions: CandidateAction[];
+  guardrail_checks?: GuardrailChecks;
+  audit_trail: Array<{
+    agent: string;
+    stage: string;
+    verdict: string;
+    hash: string;
+    created_at: string;
+  }>;
 }
 
 export interface MerchantPolicy {
-  max_discount_pct: number
-  max_outreach_per_day: number
-  allowed_channels: string[]
-  max_autonomous_amount: number
-  human_approval_threshold: number
-  recovery_window_hours: number
-  max_retry_attempts: number
+  merchant_id: string;
+  max_retries: number;
+  max_discount_pct: number;
+  cooldown_hours: number;
+  auto_whatsapp_enabled: boolean;
+  auto_email_enabled: boolean;
+  auto_upi_switch_enabled: boolean;
+  human_escalation_threshold: number;
+}
+
+export interface SimulationResult {
+  simulated_cases: number;
+  baseline_recovered_count: number;
+  baseline_recovery_rate: number;
+  revive_recovered_count: number;
+  revive_recovery_rate: number;
+  net_uplift_pct: number;
+  total_revenue_processed: number;
+  baseline_recovered_revenue: number;
+  revive_recovered_revenue: number;
+  net_recovered_dollar_lift: number;
+  guardrail_violations_prevented: number;
+  breakdown_by_cause: Record<string, {
+    total_count: number;
+    baseline_recovered: number;
+    revive_recovered: number;
+    total_amount: number;
+    revive_amount: number;
+  }>;
+  execution_time_ms: number;
 }
 
 export interface AuditLog {
-  id: string
-  case_id: string
-  decision_id: string
-  agent: string
-  action: string
-  reason: string
-  evidence: Record<string, unknown>
-  policy_checks: GuardrailCheck[]
-  execution_result: string
-  outcome?: string
-  created_at: string
+  id: string;
+  case_id?: string;
+  agent_name: string;
+  stage: string;
+  state_snapshot?: any;
+  decision_rationale?: string;
+  guardrail_verdict: string;
+  entry_hash: string;
+  created_at: string;
 }
+
+export interface Experiment {
+  id: string;
+  name: string;
+  description?: string;
+  baseline_action: string;
+  treatment_action: string;
+  cases_count: number;
+  baseline_recovery_rate: number;
+  treatment_recovery_rate: number;
+  net_uplift_pct: number;
+  p_value: number;
+  status: string;
+  created_at: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  merchant_id: string;
+  auth_provider: string;
+  avatar_url?: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: UserProfile;
+}
+
