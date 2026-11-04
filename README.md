@@ -14,6 +14,7 @@
 <br/>
 
 <!-- Animated badges -->
+[![Live Demo](https://img.shields.io/badge/Live_Demo-revive--plum.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://revive-plum.vercel.app)
 [![Build](https://img.shields.io/badge/build-passing-16A36A?style=for-the-badge&logo=githubactions&logoColor=white)](#)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](#)
 [![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=next.js&logoColor=white)](#)
@@ -21,6 +22,14 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-Multi_Agent-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](#)
 [![Razorpay](https://img.shields.io/badge/Razorpay-Test_Mode-0C68FF?style=for-the-badge&logo=razorpay&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-FFD04F?style=for-the-badge)](#)
+
+<br/>
+
+<a href="https://revive-plum.vercel.app" target="_blank">
+  <img src="https://img.shields.io/badge/%F0%9F%9A%80_OPEN_LIVE_APPLICATION-revive--plum.vercel.app-FFD04F?style=for-the-badge&labelColor=171D19&color=FFD04F" alt="Launch Live App" />
+</a>
+
+<br/>
 
 <br/>
 
@@ -141,8 +150,8 @@
 
 ```bash
 # Clone
-git clone https://github.com/your-username/revive.git
-cd revive
+git clone https://github.com/Varadsapkal19/Revive-.git
+cd Revive-
 
 # Configure
 cp .env.example .env
@@ -155,7 +164,8 @@ docker compose up --build
 
 | Service | URL | Description |
 |---|---|---|
-| 🖥️ **Dashboard** | [`http://localhost:3000`](http://localhost:3000) | REVIVE Web Application |
+| 🌐 **Live Cloud Production** | [`https://revive-plum.vercel.app`](https://revive-plum.vercel.app) | Production SaaS Dashboard on Vercel |
+| 🖥️ **Local Dashboard** | [`http://localhost:3000`](http://localhost:3000) | Local REVIVE Web Application |
 | 📡 **API Docs** | [`http://localhost:8000/docs`](http://localhost:8000/docs) | Interactive OpenAPI / Swagger |
 | 💚 **Health** | [`http://localhost:8000/health`](http://localhost:8000/health) | Liveness probe |
 
