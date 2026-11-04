@@ -9,10 +9,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname);
-    return config;
-  },
   async rewrites() {
     return [
       {
