@@ -165,9 +165,10 @@ docker compose up --build
 | Service | URL | Description |
 |---|---|---|
 | 🌐 **Live Cloud Production** | [`https://revive-plum.vercel.app`](https://revive-plum.vercel.app) | Production SaaS Dashboard on Vercel |
+| 🐍 **Live Backend API** | [`https://revive-qs5r.onrender.com`](https://revive-qs5r.onrender.com) | FastAPI Backend Engine on Render |
+| 📡 **API Docs (Swagger)** | [`https://revive-qs5r.onrender.com/docs`](https://revive-qs5r.onrender.com/docs) | Interactive OpenAPI Documentation |
+| 💚 **API Health Check** | [`https://revive-qs5r.onrender.com/health`](https://revive-qs5r.onrender.com/health) | Live Production Liveness Probe |
 | 🖥️ **Local Dashboard** | [`http://localhost:3000`](http://localhost:3000) | Local REVIVE Web Application |
-| 📡 **API Docs** | [`http://localhost:8000/docs`](http://localhost:8000/docs) | Interactive OpenAPI / Swagger |
-| 💚 **Health** | [`http://localhost:8000/health`](http://localhost:8000/health) | Liveness probe |
 
 ### Local Development (Without Docker)
 

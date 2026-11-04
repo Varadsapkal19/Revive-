@@ -76,12 +76,14 @@ async def security_headers_middleware(request: Request, call_next):
 # 2. Hardened CORS Configuration
 cors_origins = [
     settings.FRONTEND_URL,
+    "https://revive-plum.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=r"https:\/\/.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
