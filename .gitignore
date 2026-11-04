@@ -57,3 +57,12 @@ Thumbs.db
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Local agent tooling
+.tools/
+.agents/
+frontend/tsconfig.tsbuildinfo
+
+# Trained ML models
+*.joblib
+*.pkl

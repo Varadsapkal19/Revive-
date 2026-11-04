@@ -1,6 +1,6 @@
 """
 Synthetic Payment Event Generator for REVIVE Simulator and Benchmarks.
-Generates realistic Razorpay payment failure distributions.
+Generates realistic payment failure distributions.
 """
 
 import random

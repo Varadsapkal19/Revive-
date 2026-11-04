@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient for subtle depth -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A211C" />
+      <stop offset="100%" stop-color="#141815" />
+    </linearGradient>
+
+    <!-- Golden Yellow Primary Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E5A630" />
+      <stop offset="35%" stop-color="#F5B942" />
+      <stop offset="100%" stop-color="#FFD04F" />
+    </linearGradient>
+
+    <!-- Arrow Dynamic Accent Gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F5B942" />
+      <stop offset="80%" stop-color="#FFD04F" />
+      <stop offset="100%" stop-color="#FFE485" />
+    </linearGradient>
+
+    <!-- Bar Gradients (Ascending Energy) -->
+    <linearGradient id="bar1Grad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#C98B20" />
+      <stop offset="100%" stop-color="#E5A630" />
+    </linearGradient>
+    <linearGradient id="bar2Grad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#E5A630" />
+      <stop offset="100%" stop-color="#F5B942" />
+    </linearGradient>
+    <linearGradient id="bar3Grad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#F5B942" />
+      <stop offset="100%" stop-color="#FFD04F" />
+    </linearGradient>
+
+    <!-- Subtle Inner Border Glow -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2C362F" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#1A211C" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Soft Ambient Drop Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- App Icon Squircle Container -->
+  <rect
+    x="16"
+    y="16"
+    width="480"
+    height="480"
+    rx="108"
+    ry="108"
+    fill="url(#bgGrad)"
+  />
+  <rect
+    x="16"
+    y="16"
+    width="480"
+    height="480"
+    rx="108"
+    ry="108"
+    fill="none"
+    stroke="url(#borderGrad)"
+    stroke-width="3"
+  />
+
+  <!-- Main Symbol Group with Filter -->
+  <g filter="url(#shadow)">
+    <!-- Vertical Spine / Stem of the "R" -->
+    <rect
+      x="124"
+      y="116"
+      width="44"
+      height="280"
+      rx="12"
+      ry="12"
+      fill="url(#goldGrad)"
+    />
+
+    <!-- Upper Loop of the "R" -->
+    <!-- Smooth geometric path forming the classic bold counter and upper bowl -->
+    <path
+      d="M 124 116
+         H 258
+         C 324 116, 360 152, 360 206
+         C 360 260, 322 294, 256 294
+         H 124
+         Z
+         M 168 158
+         V 252
+         H 254
+         C 292 252, 316 234, 316 205
+         C 316 176, 292 158, 254 158
+         Z"
+      fill="url(#goldGrad)"
+      fill-rule="evenodd"
+    />
+
+    <!-- Three Ascending Financial Recovery Growth Bars (nested dynamically in the lower stem/waist area) -->
+    <!-- Bar 1 (Shortest - Foundation) -->
+    <rect
+      x="194"
+      y="336"
+      width="24"
+      height="60"
+      rx="8"
+      ry="8"
+      fill="url(#bar1Grad)"
+    />
+    <!-- Bar 2 (Medium - Acceleration) -->
+    <rect
+      x="232"
+      y="294"
+      width="24"
+      height="102"
+      rx="8"
+      ry="8"
+      fill="url(#bar2Grad)"
+    />
+    <!-- Bar 3 (Tallest - Value Engine Peak) -->
+    <rect
+      x="270"
+      y="252"
+      width="24"
+      height="144"
+      rx="8"
+      ry="8"
+      fill="url(#bar3Grad)"
+    />
+
+    <!-- Upward-Curving Recovery Arrow (forming the dynamic lower diagonal leg of the "R") -->
+    <!-- Sweeps from the R waist curve down and powerfully arches up-right -->
+    <path
+      d="M 238 282
+         C 264 282, 290 316, 324 336
+         C 348 350, 372 342, 396 316
+         L 396 364
+         L 374 364
+         C 334 384, 290 376, 252 340
+         C 230 318, 218 296, 218 282
+         Z"
+      fill="url(#arrowGrad)"
+      opacity="0.15"
+    />
+
+    <!-- Dynamic Growth Arrow Path -->
+    <path
+      d="M 234 278
+         C 266 280, 288 322, 326 352
+         C 352 372, 382 366, 404 338
+         L 404 334"
+      fill="none"
+      stroke="url(#arrowGrad)"
+      stroke-width="36"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Precision Arrowhead pointing to the top-right (45 deg) -->
+    <polygon
+      points="396,242 414,342 334,312"
+      fill="url(#arrowGrad)"
+    />
+
+    <!-- Subtle focal glint on arrowhead -->
+    <circle cx="396" cy="254" r="5" fill="#FFFDF8" opacity="0.85" />
+  </g>
+</svg>

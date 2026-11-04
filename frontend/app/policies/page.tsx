@@ -108,7 +108,8 @@ export default function PolicyCenterPage() {
 
   if (!policy) {
     return (
-      <div className="py-24 text-center text-sm text-slate-500 font-medium">
+      <div className="py-24 text-center text-xs text-[#777B76] font-medium flex flex-col items-center gap-2">
+        <div className="w-6 h-6 border-2 border-[#E6E1D7] border-t-[#202522] rounded-full animate-spin" />
         Loading merchant policy engine configuration...
       </div>
     );
@@ -119,33 +120,37 @@ export default function PolicyCenterPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-600" />
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#777B76]">Governance Engine</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#202522] flex items-center gap-2.5">
+            <ShieldCheck className="w-6 h-6 text-[#16A36A]" />
             Deterministic Policy Center
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs text-[#777B76] mt-0.5">
             Define merchant governance boundaries. REVIVE agents are strictly prohibited from violating these invariants.
           </p>
         </div>
 
         {/* Quick Presets */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs font-semibold">
-          <span className="text-slate-400 px-2">Presets:</span>
+        <div className="flex items-center gap-1.5 bg-[#F5F2E9] p-1.5 rounded-xl text-xs font-semibold border border-[#E6E1D7]">
+          <span className="text-[#777B76] px-2 text-[11px]">Presets:</span>
           <button
             onClick={() => applyPreset("conservative")}
-            className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors"
+            className="px-3 py-1 rounded-lg bg-[#FFFDF8] hover:bg-[#F5F2E9] text-[#202522] shadow-2xs transition-colors"
           >
             Conservative
           </button>
           <button
             onClick={() => applyPreset("standard")}
-            className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors"
+            className="px-3 py-1 rounded-lg bg-[#FFFDF8] hover:bg-[#F5F2E9] text-[#202522] font-bold shadow-2xs transition-colors"
           >
             Standard (Recommended)
           </button>
           <button
             onClick={() => applyPreset("aggressive")}
-            className="px-2.5 py-1 rounded bg-white hover:bg-slate-50 text-slate-700 shadow-2xs transition-colors"
+            className="px-3 py-1 rounded-lg bg-[#FFFDF8] hover:bg-[#F5F2E9] text-[#202522] shadow-2xs transition-colors"
           >
             Aggressive
           </button>
@@ -154,15 +159,15 @@ export default function PolicyCenterPage() {
 
       {/* Unsaved Changes Banner */}
       {isDirty && (
-        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-semibold flex items-center justify-between animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
+        <div className="p-4 bg-[#D9A441]/15 border border-[#D9A441]/40 text-[#202522] rounded-[20px] text-xs font-semibold flex items-center justify-between animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-[#D9A441]" />
             <span>You have unsaved policy modifications. Remember to save to update live guardrails.</span>
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold"
+            className="px-3.5 py-1.5 bg-[#202522] hover:bg-[#202522]/90 text-[#FFD45C] rounded-xl text-xs font-bold"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
@@ -171,17 +176,17 @@ export default function PolicyCenterPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Merchant Policy Configuration Form */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-5">
-          <h3 className="font-bold text-sm text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-blue-600" />
+        <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-6 shadow-xs space-y-5">
+          <h2 className="font-bold text-sm text-[#202522] border-b border-[#E6E1D7] pb-3 flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-[#202522]" />
             Active Merchant Invariants
-          </h3>
+          </h2>
 
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-bold text-slate-700">Maximum Discount Ceiling</label>
-                <span className="font-mono text-xs font-bold text-blue-600">{policy.max_discount_pct}%</span>
+                <label className="text-xs font-bold text-[#202522]">Maximum Discount Ceiling</label>
+                <span className="font-mono text-xs font-bold text-[#202522] bg-[#F5F2E9] px-2 py-0.5 rounded-md border border-[#E6E1D7]">{policy.max_discount_pct}%</span>
               </div>
               <input
                 type="number"
@@ -189,17 +194,17 @@ export default function PolicyCenterPage() {
                 max="50"
                 value={policy.max_discount_pct}
                 onChange={(e) => setPolicy({ ...policy, max_discount_pct: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-sm font-mono text-[#202522] bg-[#FFFDF8] focus:border-[#202522] outline-hidden transition-colors"
               />
-              <span className="text-[11px] text-slate-400 mt-1 block">
+              <span className="text-[11px] text-[#777B76] mt-1 block">
                 Any autonomous action attempting a higher discount will be strictly blocked.
               </span>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-bold text-slate-700">Maximum Automated Retries</label>
-                <span className="font-mono text-xs font-bold text-blue-600">{policy.max_retries} attempts</span>
+                <label className="text-xs font-bold text-[#202522]">Maximum Automated Retries</label>
+                <span className="font-mono text-xs font-bold text-[#202522] bg-[#F5F2E9] px-2 py-0.5 rounded-md border border-[#E6E1D7]">{policy.max_retries} attempts</span>
               </div>
               <input
                 type="number"
@@ -207,17 +212,17 @@ export default function PolicyCenterPage() {
                 max="10"
                 value={policy.max_retries}
                 onChange={(e) => setPolicy({ ...policy, max_retries: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-sm font-mono text-[#202522] bg-[#FFFDF8] focus:border-[#202522] outline-hidden transition-colors"
               />
-              <span className="text-[11px] text-slate-400 mt-1 block">
+              <span className="text-[11px] text-[#777B76] mt-1 block">
                 Caps automated attempts to prevent gateway throttling and issuer fees.
               </span>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-bold text-slate-700">Customer Contact Cooldown</label>
-                <span className="font-mono text-xs font-bold text-blue-600">{policy.cooldown_hours} hours</span>
+                <label className="text-xs font-bold text-[#202522]">Customer Contact Cooldown</label>
+                <span className="font-mono text-xs font-bold text-[#202522] bg-[#F5F2E9] px-2 py-0.5 rounded-md border border-[#E6E1D7]">{policy.cooldown_hours} hours</span>
               </div>
               <input
                 type="number"
@@ -225,41 +230,41 @@ export default function PolicyCenterPage() {
                 max="72"
                 value={policy.cooldown_hours}
                 onChange={(e) => setPolicy({ ...policy, cooldown_hours: Number(e.target.value) })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-sm font-mono text-[#202522] bg-[#FFFDF8] focus:border-[#202522] outline-hidden transition-colors"
               />
-              <span className="text-[11px] text-slate-400 mt-1 block">
+              <span className="text-[11px] text-[#777B76] mt-1 block">
                 Enforces minimum elapsed time between outbound emails or WhatsApp notifications.
               </span>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 space-y-2.5">
-              <span className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <div className="pt-3 border-t border-[#E6E1D7] space-y-2.5">
+              <span className="block text-xs font-bold text-[#202522] uppercase tracking-wider">
                 Approved Automated Outbound Channels
               </span>
-              <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 text-xs text-[#202522] cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={policy.auto_whatsapp_enabled}
                   onChange={(e) => setPolicy({ ...policy, auto_whatsapp_enabled: e.target.checked })}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                  className="rounded text-[#202522] accent-[#202522] w-4 h-4"
                 />
-                Automated WhatsApp Razorpay Payment Links
+                Automated WhatsApp Payment Recovery Links
               </label>
-              <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 text-xs text-[#202522] cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={policy.auto_email_enabled}
                   onChange={(e) => setPolicy({ ...policy, auto_email_enabled: e.target.checked })}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                  className="rounded text-[#202522] accent-[#202522] w-4 h-4"
                 />
                 Automated Email Invoice Updates &amp; Recovery Links
               </label>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-4 border-t border-[#E6E1D7] flex items-center justify-between">
             {saveSuccess ? (
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#16A36A] flex items-center gap-1.5">
                 <Check className="w-4 h-4" /> Policy rules updated!
               </span>
             ) : <span />}
@@ -267,29 +272,29 @@ export default function PolicyCenterPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all"
+              className="px-5 py-2.5 bg-[#FFD45C] hover:bg-[#F4C64C] text-[#202522] rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              <Save className="w-3.5 h-3.5" />
+              <Save className="w-3.5 h-3.5 fill-[#202522]" />
               {saving ? "Persisting Rules..." : "Save Merchant Policy"}
             </button>
           </div>
         </div>
 
         {/* Live Guardrail Evaluation Sandbox */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <Play className="w-4 h-4 text-emerald-600" />
+        <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-6 shadow-xs space-y-5">
+          <div className="border-b border-[#E6E1D7] pb-3">
+            <h2 className="font-bold text-sm text-[#202522] flex items-center gap-2">
+              <Play className="w-4 h-4 text-[#16A36A] fill-[#16A36A]" />
               Interactive Guardrail Testing Sandbox
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            </h2>
+            <p className="text-xs text-[#777B76] mt-0.5">
               Simulate an action proposal to see the deterministic engine accept or veto it.
             </p>
           </div>
 
           {/* Test Presets */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold text-[#777B76] uppercase tracking-wider block">
               Quick Test Scenarios:
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -301,7 +306,7 @@ export default function PolicyCenterPage() {
                   setTestRetries(1);
                   setTestCooldown(12.0);
                 }}
-                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium"
+                className="px-2.5 py-1 rounded-lg bg-[#F5F2E9] hover:bg-[#E6E1D7] text-[#202522] text-[11px] font-medium border border-[#E6E1D7]"
               >
                 Rogue 25% Discount
               </button>
@@ -313,7 +318,7 @@ export default function PolicyCenterPage() {
                   setTestRetries(3);
                   setTestCooldown(24.0);
                 }}
-                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium"
+                className="px-2.5 py-1 rounded-lg bg-[#F5F2E9] hover:bg-[#E6E1D7] text-[#202522] text-[11px] font-medium border border-[#E6E1D7]"
               >
                 Exceeded 4th Retry
               </button>
@@ -325,7 +330,7 @@ export default function PolicyCenterPage() {
                   setTestRetries(0);
                   setTestCooldown(2.0);
                 }}
-                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium"
+                className="px-2.5 py-1 rounded-lg bg-[#F5F2E9] hover:bg-[#E6E1D7] text-[#202522] text-[11px] font-medium border border-[#E6E1D7]"
               >
                 Cooldown Breach (2h ago)
               </button>
@@ -337,7 +342,7 @@ export default function PolicyCenterPage() {
                   setTestRetries(1);
                   setTestCooldown(14.0);
                 }}
-                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium"
+                className="px-2.5 py-1 rounded-lg bg-[#F5F2E9] hover:bg-[#E6E1D7] text-[#202522] text-[11px] font-medium border border-[#E6E1D7]"
               >
                 Compliant 5% Discount
               </button>
@@ -347,11 +352,11 @@ export default function PolicyCenterPage() {
           {/* Form */}
           <div className="space-y-3 pt-2">
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">Proposed Action</label>
+              <label className="block text-xs font-semibold text-[#202522] mb-1">Proposed Action</label>
               <select
                 value={testAction}
                 onChange={(e) => setTestAction(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white"
+                className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-xs bg-[#FFFDF8] text-[#202522] focus:border-[#202522] outline-hidden transition-colors"
               >
                 <option value="INCENTIVIZED_OFFER">INCENTIVIZED_OFFER (Retention Incentive)</option>
                 <option value="SMART_RETRY">SMART_RETRY (Bank Gateway Retry)</option>
@@ -361,30 +366,30 @@ export default function PolicyCenterPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Proposed Discount (%)</label>
+                <label className="block text-xs font-semibold text-[#202522] mb-1">Proposed Discount (%)</label>
                 <input
                   type="number"
                   value={testDiscount}
                   onChange={(e) => setTestDiscount(Number(e.target.value))}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold"
+                  className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-xs font-mono font-bold text-[#202522] bg-[#FFFDF8] focus:border-[#202522] outline-hidden transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Prior Retry Count</label>
+                <label className="block text-xs font-semibold text-[#202522] mb-1">Prior Retry Count</label>
                 <input
                   type="number"
                   value={testRetries}
                   onChange={(e) => setTestRetries(Number(e.target.value))}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold"
+                  className="w-full px-3 py-2 border border-[#E6E1D7] rounded-xl text-xs font-mono font-bold text-[#202522] bg-[#FFFDF8] focus:border-[#202522] outline-hidden transition-colors"
                 />
               </div>
             </div>
 
             <button
               onClick={handleTestSandbox}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all mt-3"
+              className="w-full py-2.5 bg-[#202522] hover:bg-[#202522]/90 text-[#FFFDF8] rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-2 transition-all mt-4"
             >
-              <Play className="w-3.5 h-3.5" />
+              <Play className="w-3.5 h-3.5 fill-[#FFD45C] text-[#FFD45C]" />
               Evaluate Against Active Policy
             </button>
           </div>
@@ -392,28 +397,28 @@ export default function PolicyCenterPage() {
           {/* Output Verdict */}
           {testResult && (
             <div
-              className={`p-4 rounded-xl border animate-in fade-in duration-200 ${
+              className={`p-4 rounded-2xl border animate-in fade-in duration-200 ${
                 testResult.approved
-                  ? "bg-emerald-50 border-emerald-200 text-emerald-900"
-                  : "bg-red-50 border-red-200 text-red-900"
+                  ? "bg-[#16A36A]/10 border-[#16A36A]/30 text-[#16A36A]"
+                  : "bg-[#D75C5C]/10 border-[#D75C5C]/30 text-[#D75C5C]"
               }`}
             >
               <div className="flex items-center gap-2 font-bold text-sm">
                 {testResult.approved ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <CheckCircle2 className="w-4 h-4 text-[#16A36A]" />
                     ACTION APPROVED BY GUARDRAIL ENGINE
                   </>
                 ) : (
                   <>
-                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <AlertTriangle className="w-4 h-4 text-[#D75C5C]" />
                     ACTION VETOED BY GUARDRAIL ENGINE
                   </>
                 )}
               </div>
 
               {testResult.violations?.length > 0 && (
-                <ul className="mt-2 text-xs space-y-1 list-disc list-inside font-semibold text-red-700">
+                <ul className="mt-2 text-xs space-y-1 list-disc list-inside font-semibold text-[#D75C5C]">
                   {testResult.violations.map((v: string, i: number) => (
                     <li key={i}>{v}</li>
                   ))}

@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 
+const PUBLIC_AUTH_ROUTES = ["/login", "/register", "/forgot-password", "/reset-password"];
+
 export function ShellLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -17,43 +19,47 @@ export function ShellLayout({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(isAuthed);
     setAuthChecked(true);
 
-    // Strict Auth Guard: If not logged in and not on login page, block everything & redirect to /login
-    if (!isAuthed && pathname !== "/login") {
+    const isAuthRoute = PUBLIC_AUTH_ROUTES.includes(pathname);
+
+    // Strict Auth Guard: If not logged in and not on public auth route, redirect to /login
+    if (!isAuthed && !isAuthRoute) {
       router.replace("/login");
-    } else if (isAuthed && pathname === "/login") {
+    } else if (isAuthed && isAuthRoute) {
       router.replace("/dashboard");
     }
   }, [pathname, router]);
 
-  // While checking auth token, display a clean minimal spinner
+  const isAuthRoute = PUBLIC_AUTH_ROUTES.includes(pathname);
+
+  // While checking auth token, display a clean minimal spinner matching brand palette
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F2E9] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
-          <span className="text-xs font-medium text-zinc-400 tracking-tight">Verifying secure session...</span>
+          <div className="w-6 h-6 border-2 border-[#E7E3D8] border-t-[#202421] rounded-full animate-spin" />
+          <span className="text-xs font-medium text-[#77786F] tracking-tight">Verifying secure workspace...</span>
         </div>
       </div>
     );
   }
 
-  // If not authenticated and not on login page, DO NOT RENDER ANYTHING (Block access completely)
-  if (!isAuthenticated && pathname !== "/login") {
+  // If not authenticated and not on a public auth route, block rendering completely
+  if (!isAuthenticated && !isAuthRoute) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F5F2E9] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#E7E3D8] border-t-[#202421] rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Login page layout (standalone, no sidebar, no topbar)
-  if (pathname === "/login") {
-    return <main className="min-h-screen bg-[#fafafa]">{children}</main>;
+  // Public authentication pages layout (standalone, no sidebar, no topbar)
+  if (isAuthRoute) {
+    return <main className="min-h-screen bg-[#F5F2E9]">{children}</main>;
   }
 
   // Authenticated application layout
   return (
-    <div className="flex bg-[#fafafa] min-h-screen">
+    <div className="flex bg-[#F5F2E9] min-h-screen text-[#202421]">
       <Sidebar />
       <div className="flex-1 ml-64 min-h-screen flex flex-col">
         <TopBar />

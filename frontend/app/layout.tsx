@@ -3,8 +3,8 @@ import "./globals.css";
 import { ShellLayout } from "@/components/layout/ShellLayout";
 
 export const metadata: Metadata = {
-  title: "REVIVE — Revenue Recovery Intelligence & Value Engine",
-  description: "Autonomous payment recovery intelligence layer for the Razorpay Buildathon.",
+  title: "REVIVE — Autonomous Revenue Intelligence Engine",
+  description: "AI-powered payment failure recovery and financial operations platform.",
 };
 
 export default function RootLayout({

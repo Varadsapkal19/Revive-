@@ -4,41 +4,68 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: revive-postgres
-    restart: always
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
-      POSTGRES_USER: revive_user
-      POSTGRES_PASSWORD: revive_password
-      POSTGRES_DB: revive_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-revive_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-revive_secure_prod_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-revive_db}
+    # Security: Database port is NOT published to public host network
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U revive_user -d revive_db"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - revive-internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
 
   redis:
     image: redis:7-alpine
     container_name: revive-redis
-    restart: always
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-revive_redis_secure_pass_2026}"]
+    # Security: Redis port is NOT published to public host network
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-revive_redis_secure_pass_2026}", "ping"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - revive-internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: revive-backend
-    restart: always
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,27 +73,57 @@ services:
         condition: service_healthy
     environment:
       - ENVIRONMENT=production
-      - DATABASE_URL=postgresql://revive_user:revive_password@postgres:5432/revive_db
-      - REDIS_URL=redis://redis:6379/0
-      - RAZORPAY_MOCK_MODE=true
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - DEBUG=false
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-revive_user}:${POSTGRES_PASSWORD:-revive_secure_prod_password_2026}@postgres:5432/${POSTGRES_DB:-revive_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-revive_redis_secure_pass_2026}@redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-revive_enterprise_jwt_super_secret_signing_key_2026_at_least_32_chars}
+      - APPROVAL_SECRET_KEY=${APPROVAL_SECRET_KEY:-revive_deterministic_agent_guardrail_approval_secret_2026}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-rzp_live_REVIVE_PROD}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-REVIVE_PROD_SECRET_KEY}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-REVIVE_PROD_WEBHOOK_SECRET}
+      - RAZORPAY_MOCK_MODE=${RAZORPAY_MOCK_MODE:-false}
+      - FRONTEND_URL=http://localhost:3000
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
+    networks:
+      - revive-internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1.5G
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: revive-frontend
-    restart: always
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
     depends_on:
       - backend
     environment:
+      - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     ports:
       - "3000:3000"
+    networks:
+      - revive-internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+networks:
+  revive-internal-net:
+    driver: bridge
+    internal: false
 
 volumes:
   postgres_data:

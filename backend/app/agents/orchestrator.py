@@ -1,6 +1,7 @@
 """
 REVIVE Multi-Agent Orchestrator
-Coordinates Sentinel -> Diagnostician -> Strategist -> Guardrail Gate -> Executor -> Auditor.
+Coordinates Sentinel -> Diagnostician -> Strategist -> Guardrail Gate -> Cryptographic Approval -> Executor -> Auditor.
+Enforces Section 8 AI Agent Security: The deterministic policy engine is the sole approval authority.
 """
 
 import logging
@@ -12,6 +13,7 @@ from app.agents.strategist import strategist_agent
 from app.agents.executor import executor_agent
 from app.agents.auditor import auditor_agent
 from app.policy.guardrail_engine import GuardrailEngine
+from app.security.approval_token import issue_execution_approval
 
 logger = logging.getLogger("revive.orchestrator")
 
@@ -25,17 +27,17 @@ class AgentOrchestrator:
         """
         state = initial_state
 
-        # 1. Sentinel Triage
+        # 1. Sentinel Triage (Anomaly detection & event hygiene)
         state = sentinel_agent.process(state)
 
-        # 2. Diagnostician Root Cause Analysis
+        # 2. Diagnostician Root Cause Analysis (Sanitized LLM context)
         state = await diagnostician_agent.process(state)
 
-        # 3. Strategist Expected Value Ranking
+        # 3. Strategist Expected Value Ranking (Proposal generation only)
         state = strategist_agent.process(state)
 
         # 4. Deterministic Guardrail Evaluation Gate
-        # Attempt top candidate actions in rank order until one passes guardrails
+        # Top candidate actions evaluated in rank order until one passes deterministic invariants
         candidates = state.get("candidate_actions", [])
         chosen_action = None
         guardrail_result = None
@@ -61,7 +63,7 @@ class AgentOrchestrator:
                 )
 
         if chosen_action is None:
-            # Fallback to safe HUMAN_ESCALATION if all automated interventions fail guardrails
+            # Safe deterministic fallback if all automated actions fail guardrails
             fallback = {
                 "action_type": "HUMAN_ESCALATION",
                 "expected_value": 0.0,
@@ -80,10 +82,30 @@ class AgentOrchestrator:
         state["guardrail_violations"] = guardrail_result.violations if guardrail_result else []
         state["guardrail_checks"] = guardrail_result.checked_rules if guardrail_result else []
 
-        # 5. Executor Governed Dispatch
+        # 5. Issue Cryptographic Execution Approval Token (Section 8)
+        # Binds (merchant_id, case_id, action_type, payload_hash, policy_version, nonce, expires_at)
+        if state["guardrail_approved"] and chosen_action:
+            action_payload = {
+                "amount": state.get("amount", 0.0),
+                "discount_pct": chosen_action.get("discount_pct", 0.0),
+                "channel": chosen_action.get("channel", "EMAIL")
+            }
+            approval_token = issue_execution_approval(
+                merchant_id=state.get("merchant_id") or "default_merchant",
+                case_id=state.get("case_id") or "unknown_case",
+                action_type=chosen_action.get("action_type", "HUMAN_ESCALATION"),
+                action_payload=action_payload,
+                policy_version=1
+            )
+            state["execution_approval_token"] = approval_token
+            state["action_payload"] = action_payload
+        else:
+            state["execution_approval_token"] = None
+
+        # 6. Executor Governed Dispatch (Verifies Cryptographic Approval)
         state = await executor_agent.process(state)
 
-        # 6. Auditor Immutable Cryptographic Logging
+        # 7. Auditor Immutable Cryptographic Logging (Hash chaining)
         state = auditor_agent.process(state)
 
         return state

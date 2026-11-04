@@ -26,70 +26,78 @@ export default function ExperimentsPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-          <FlaskConical className="w-6 h-6 text-blue-600" />
-          A/B Experiments & Statistical Rigor
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#777B76]">Hypothesis Testing</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#202522] flex items-center gap-2.5">
+          <FlaskConical className="w-6 h-6 text-[#202522]" />
+          A/B Experiments &amp; Statistical Rigor
         </h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-xs text-[#777B76] mt-0.5">
           Scientifically validating autonomous multi-channel recovery against traditional dunning schedules.
         </p>
       </div>
 
       <div className="space-y-6">
         {loading ? (
-          <div className="py-16 text-center text-sm text-slate-500">Loading experiments...</div>
+          <div className="py-16 text-center text-xs text-[#777B76]">
+            <div className="w-5 h-5 border-2 border-[#E6E1D7] border-t-[#202522] rounded-full animate-spin mx-auto mb-2" />
+            Loading experiments...
+          </div>
         ) : (
           experiments.map((exp) => (
-            <div key={exp.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+            <div key={exp.id} className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-6 shadow-xs space-y-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-4 border-b border-[#E6E1D7]">
                 <div>
-                  <h3 className="font-bold text-base text-slate-900">{exp.name}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{exp.description}</p>
+                  <h3 className="font-bold text-base text-[#202522]">{exp.name}</h3>
+                  <p className="text-xs text-[#777B76] mt-0.5">{exp.description}</p>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#16A36A]/10 text-[#16A36A] border border-[#16A36A]/30">
                   {exp.status}
                 </span>
               </div>
 
               {/* Two variants */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="p-5 rounded-2xl bg-[#F5F2E9]/60 border border-[#E6E1D7]">
+                  <span className="text-[11px] font-bold text-[#777B76] uppercase tracking-wider">
                     Control Variant (A)
                   </span>
-                  <div className="font-semibold text-sm text-slate-800 mt-1">{exp.baseline_action}</div>
+                  <div className="font-semibold text-sm text-[#202522] mt-1">{exp.baseline_action}</div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-2xl font-bold font-mono text-slate-900">
+                    <span className="text-3xl font-extrabold font-mono text-[#777B76]">
                       {exp.baseline_recovery_rate}%
                     </span>
-                    <span className="text-xs text-slate-500">Win Rate</span>
+                    <span className="text-xs text-[#777B76]">Win Rate</span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-200">
-                  <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
-                    Treatment Variant (B)
+                <div className="p-5 rounded-2xl bg-[#FFFDF8] border border-[#202522] ring-1 ring-[#FFD45C]">
+                  <span className="text-[11px] font-bold text-[#202522] uppercase tracking-wider flex items-center justify-between">
+                    <span>Treatment Variant (B)</span>
+                    <span className="text-[10px] bg-[#FFD45C] text-[#202522] px-2 py-0.5 rounded-full font-extrabold">CHALLENGER</span>
                   </span>
-                  <div className="font-semibold text-sm text-blue-900 mt-1">{exp.treatment_action}</div>
+                  <div className="font-bold text-sm text-[#202522] mt-1">{exp.treatment_action}</div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-2xl font-bold font-mono text-blue-700">
+                    <span className="text-3xl font-extrabold font-mono text-[#202522]">
                       {exp.treatment_recovery_rate}%
                     </span>
-                    <span className="text-xs text-blue-600 font-semibold">Win Rate</span>
+                    <span className="text-xs text-[#16A36A] font-bold">Win Rate</span>
                   </div>
                 </div>
               </div>
 
               {/* Statistical Confidence Metrics */}
               <div className="pt-2 flex flex-wrap items-center justify-between gap-4 text-xs">
-                <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                  <TrendingUp className="w-4 h-4" /> Net Uplift: +{exp.net_uplift_pct}%
+                <div className="flex items-center gap-2 text-[#16A36A] font-extrabold">
+                  <TrendingUp className="w-4 h-4 stroke-[2.5]" /> Net Uplift: +{exp.net_uplift_pct}%
                 </div>
-                <div className="text-slate-500">
-                  Sample Size: <span className="font-mono font-semibold text-slate-800">{exp.cases_count.toLocaleString()} cases</span>
+                <div className="text-[#777B76]">
+                  Sample Size: <span className="font-mono font-bold text-[#202522]">{exp.cases_count.toLocaleString()} cases</span>
                 </div>
-                <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <div className="flex items-center gap-1.5 font-bold text-[#202522]">
+                  <CheckCircle2 className="w-4 h-4 text-[#16A36A]" />
                   Statistically Significant (p-value &lt; {exp.p_value})
                 </div>
               </div>

@@ -83,8 +83,8 @@ export default function CaseDetailPage() {
 
   if (loading) {
     return (
-      <div className="py-24 text-center text-sm text-slate-500 font-medium flex flex-col items-center gap-2">
-        <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
+      <div className="py-24 text-center text-xs text-[#777B76] font-medium flex flex-col items-center gap-2">
+        <div className="w-6 h-6 border-2 border-[#E6E1D7] border-t-[#202522] rounded-full animate-spin" />
         Tracing forensic payment lifecycle...
       </div>
     );
@@ -93,10 +93,10 @@ export default function CaseDetailPage() {
   if (!caseData) {
     return (
       <div className="py-24 text-center">
-        <h3 className="text-lg font-bold text-slate-900">Case Not Found</h3>
+        <h3 className="text-lg font-bold text-[#202522]">Case Not Found</h3>
         <button
           onClick={() => router.push("/cases")}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold"
+          className="mt-4 px-4 py-2 bg-[#FFD45C] text-[#202522] rounded-xl text-xs font-bold shadow-xs hover:bg-[#F4C64C]"
         >
           Return to Cases
         </button>
@@ -110,45 +110,45 @@ export default function CaseDetailPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2 z-50 animate-in fade-in slide-in-from-bottom-4">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 bg-[#202522] text-[#FFFDF8] px-4 py-3 rounded-2xl text-xs font-semibold shadow-xl border border-[#202522] flex items-center gap-2 z-50 animate-in fade-in slide-in-from-bottom-4">
+          <CheckCircle2 className="w-4 h-4 text-[#16A36A]" />
           {toastMessage}
         </div>
       )}
 
       {/* Breadcrumb & Navigation */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link href="/cases" className="hover:text-slate-900 font-medium">
+        <div className="flex items-center gap-2 text-xs text-[#777B76]">
+          <Link href="/cases" className="hover:text-[#202522] font-medium transition-colors">
             Recovery Cases
           </Link>
           <span>/</span>
-          <span className="font-mono font-semibold text-slate-900">Case #{caseData.id.slice(0, 8)}</span>
+          <span className="font-mono font-bold text-[#202522]">Case #{caseData.id.slice(0, 8)}</span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={exportAuditJson}
-            className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1.5 shadow-2xs transition-colors"
+            className="px-3.5 py-2 border border-[#E6E1D7] bg-[#FFFDF8] hover:bg-[#F5F2E9] rounded-xl text-xs font-semibold text-[#202522] flex items-center gap-1.5 shadow-2xs transition-colors"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <Download className="w-3.5 h-3.5 text-[#777B76]" />
             Export Forensic Audit (JSON)
           </button>
         </div>
       </div>
 
       {/* Hero Banner with Status & Quick Actions */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-6 shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="font-mono text-xs font-bold text-slate-400">RAZORPAY RECOVERY CASE</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-mono text-xs font-bold text-[#777B76]">RECOVERY CASE</span>
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              className={`px-3 py-0.5 rounded-full text-xs font-bold ${
                 caseData.status === "RECOVERED"
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  ? "bg-[#16A36A]/10 text-[#16A36A] border border-[#16A36A]/30"
                   : caseData.status === "IN_RECOVERY"
-                  ? "bg-blue-50 text-blue-800 border border-blue-200"
-                  : "bg-slate-100 text-slate-700 border border-slate-200"
+                  ? "bg-[#FFD45C]/20 text-[#202522] border border-[#FFD45C]"
+                  : "bg-[#F5F2E9] text-[#777B76] border border-[#E6E1D7]"
               }`}
             >
               ● {caseData.status}
@@ -156,11 +156,11 @@ export default function CaseDetailPage() {
           </div>
 
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-extrabold font-mono text-slate-900">
+            <span className="text-3xl font-extrabold font-mono text-[#202522]">
               {formatCurrency(caseData.amount)}
             </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Diagnosed as: <span className="font-bold text-slate-800">{caseData.diagnosed_root_cause?.replace("_", " ")}</span>
+            <span className="text-xs text-[#777B76]">
+              Diagnosed as: <span className="font-bold text-[#202522]">{caseData.diagnosed_root_cause?.replace("_", " ")}</span>
             </span>
           </div>
         </div>
@@ -172,21 +172,21 @@ export default function CaseDetailPage() {
               <button
                 disabled={actionLoading}
                 onClick={() => handleAction("RETRY_GATEWAY")}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                className="px-3.5 py-2 bg-[#F5F2E9] hover:bg-[#E6E1D7] text-[#202522] border border-[#E6E1D7] rounded-xl text-xs font-bold transition-all disabled:opacity-50"
               >
                 Force Gateway Retry
               </button>
               <button
                 disabled={actionLoading}
                 onClick={() => handleAction("DISPATCH_WHATSAPP")}
-                className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                className="px-3.5 py-2 bg-[#FFD45C] hover:bg-[#F4C64C] text-[#202522] rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-xs"
               >
                 Dispatch via WhatsApp
               </button>
               <button
                 disabled={actionLoading}
                 onClick={() => handleAction("MARK_RECOVERED")}
-                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all disabled:opacity-50"
+                className="px-4 py-2 bg-[#16A36A] hover:bg-[#16A36A]/90 text-white rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50"
               >
                 Mark as Recovered
               </button>
@@ -194,8 +194,8 @@ export default function CaseDetailPage() {
           )}
 
           {caseData.status === "RECOVERED" && (
-            <div className="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs font-bold flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <div className="px-4 py-2 bg-[#16A36A]/10 border border-[#16A36A]/30 rounded-xl text-[#16A36A] text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#16A36A]" />
               Recaptured {formatCurrency(caseData.recovered_amount || caseData.amount)}
             </div>
           )}
@@ -207,85 +207,85 @@ export default function CaseDetailPage() {
         {/* Left: Customer & Payment Telemetry */}
         <div className="space-y-5">
           {/* Customer Profile Card */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <User className="w-3.5 h-3.5 text-slate-500" />
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs space-y-4">
+            <h2 className="font-bold text-xs uppercase tracking-wider text-[#777B76] flex items-center gap-2">
+              <User className="w-3.5 h-3.5 text-[#202522]" />
               Customer Profile
-            </h3>
+            </h2>
 
-            <div className="space-y-2.5 text-xs">
+            <div className="space-y-3 text-xs">
               <div>
-                <span className="text-slate-400 block text-[11px]">Customer Name</span>
-                <span className="font-semibold text-slate-900">{caseData.customer_name || "Aarav Sharma"}</span>
+                <span className="text-[#777B76] block text-[11px]">Customer Name</span>
+                <span className="font-bold text-[#202522]">{caseData.customer_name || "Aarav Sharma"}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px]">Email Address</span>
-                <span className="font-mono text-slate-700">{caseData.customer_email || "aarav.sharma@enterprise.in"}</span>
+                <span className="text-[#777B76] block text-[11px]">Email Address</span>
+                <span className="font-mono text-[#202522]">{caseData.customer_email || "aarav.sharma@enterprise.in"}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+              <div className="flex justify-between items-center pt-3 border-t border-[#E6E1D7]">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Account Tier</span>
-                  <span className="font-bold text-blue-700">{caseData.customer_tier || "STANDARD"}</span>
+                  <span className="text-[#777B76] block text-[11px]">Account Tier</span>
+                  <span className="font-bold text-[#202522]">{caseData.customer_tier || "STANDARD"}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-slate-400 block text-[11px]">Prior Retries</span>
-                  <span className="font-mono font-bold text-slate-800">{caseData.retry_count || 0} / 3</span>
+                  <span className="text-[#777B76] block text-[11px]">Prior Retries</span>
+                  <span className="font-mono font-bold text-[#202522]">{caseData.retry_count || 0} / 3</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Payment Instrument Telemetry */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs space-y-4">
+            <h2 className="font-bold text-xs uppercase tracking-wider text-[#777B76] flex items-center gap-2">
+              <CreditCard className="w-3.5 h-3.5 text-[#202522]" />
               Transaction Telemetry
-            </h3>
+            </h2>
 
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Payment ID:</span>
-                <span className="font-mono font-semibold text-slate-800">pay_{caseData.id.slice(0, 10)}</span>
+                <span className="text-[#777B76]">Payment ID:</span>
+                <span className="font-mono font-semibold text-[#202522]">pay_{caseData.id.slice(0, 10)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Bank / Network:</span>
-                <span className="font-semibold text-slate-800">HDFC Bank Ltd</span>
+                <span className="text-[#777B76]">Bank / Network:</span>
+                <span className="font-semibold text-[#202522]">HDFC Bank Ltd</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Payment Method:</span>
-                <span className="font-semibold text-slate-800">UPI AutoPay (Google Pay)</span>
+                <span className="text-[#777B76]">Payment Method:</span>
+                <span className="font-semibold text-[#202522]">UPI AutoPay (Google Pay)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Gateway Status:</span>
-                <span className="font-mono font-bold text-red-600">400 Bad Request</span>
+                <span className="text-[#777B76]">Gateway Status:</span>
+                <span className="font-mono font-bold text-[#D75C5C]">400 Bad Request</span>
               </div>
             </div>
           </div>
 
-          {/* Razorpay Link Quick Card */}
+          {/* Payment Recovery Link Quick Card */}
           {receipt?.razorpay_payment_link && (
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-xs space-y-2">
-              <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">
-                Razorpay Recovery Link (Test Mode)
+            <div className="bg-[#F5F2E9] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs space-y-3">
+              <span className="text-[11px] font-bold text-[#202522] uppercase tracking-wider block">
+                Payment Recovery Link
               </span>
-              <div className="p-2 bg-white rounded-lg border border-blue-200/80 font-mono text-xs text-blue-800 truncate select-all">
+              <div className="p-2.5 bg-[#FFFDF8] rounded-xl border border-[#E6E1D7] font-mono text-xs text-[#202522] truncate select-all">
                 {receipt.razorpay_payment_link}
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <button
                   onClick={() => copyPaymentLink(receipt.razorpay_payment_link!)}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors"
+                  className="px-3.5 py-1.5 bg-[#FFD45C] hover:bg-[#F4C64C] text-[#202522] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? "Copied!" : "Copy Link"}
                 </button>
                 <a
                   href={receipt.razorpay_payment_link}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="px-3.5 py-1.5 bg-[#FFFDF8] hover:bg-[#F5F2E9] border border-[#E6E1D7] text-[#202522] rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors"
                 >
-                  Open <ExternalLink className="w-3 h-3" />
+                  Open <ExternalLink className="w-3 h-3 text-[#777B76]" />
                 </a>
               </div>
             </div>
@@ -294,71 +294,71 @@ export default function CaseDetailPage() {
 
         {/* Right: Autonomous Multi-Agent Forensic Decision Trace */}
         <div className="lg:col-span-2 space-y-5">
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-blue-600" />
+          <h2 className="text-base font-bold text-[#202522] flex items-center gap-2">
+            <Zap className="w-4 h-4 fill-[#202522]" />
             Closed-Loop Multi-Agent Trace &amp; Audit Trail
           </h2>
 
           {/* Step 1: Sentinel */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D7] mb-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#202522] text-[#FFD45C] flex items-center justify-center font-bold text-xs shadow-2xs">
                   1
                 </span>
-                <span className="font-bold text-sm text-slate-900">Agent: Sentinel (Urgency &amp; Risk Triage)</span>
+                <span className="font-bold text-sm text-[#202522]">Agent: Sentinel (Urgency &amp; Risk Triage)</span>
               </div>
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800">
+              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-full bg-[#F5F2E9] text-[#202522] border border-[#E6E1D7]">
                 Risk Score: {(caseData.risk_score * 100).toFixed(0)} / 100
               </span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Monitored payment failure event. Evaluated invoice amount ({formatCurrency(caseData.amount)}), customer tenure, and failure frequency. Assigned urgency tier: <span className="font-bold text-slate-900">{caseData.urgency}</span>.
+            <p className="text-xs text-[#777B76] leading-relaxed">
+              Monitored payment failure event. Evaluated invoice amount ({formatCurrency(caseData.amount)}), customer tenure, and failure frequency. Assigned urgency tier: <span className="font-bold text-[#202522]">{caseData.urgency}</span>.
             </p>
           </div>
 
           {/* Step 2: Diagnostician */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D7] mb-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#202522] text-[#FFD45C] flex items-center justify-center font-bold text-xs shadow-2xs">
                   2
                 </span>
-                <span className="font-bold text-sm text-slate-900">Agent: Diagnostician (Forensic Analysis)</span>
+                <span className="font-bold text-sm text-[#202522]">Agent: Diagnostician (Forensic Analysis)</span>
               </div>
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-full bg-[#16A36A]/10 text-[#16A36A] border border-[#16A36A]/30">
                 Confidence: {((caseData.diagnostic_confidence || 0.94) * 100).toFixed(0)}%
               </span>
             </div>
-            <div className="text-xs text-slate-700 space-y-1.5">
+            <div className="text-xs text-[#202522] space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-slate-400">Classified Root Cause:</span>
-                <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                <span className="text-[#777B76]">Classified Root Cause:</span>
+                <span className="font-bold text-[#202522] bg-[#F5F2E9] px-2.5 py-1 rounded-md border border-[#E6E1D7]">
                   {caseData.diagnosed_root_cause}
                 </span>
               </div>
-              <p className="text-slate-500 italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+              <p className="text-[#777B76] italic bg-[#F5F2E9]/60 p-3 rounded-xl border border-[#E6E1D7]">
                 &ldquo;{caseData.diagnostic_reasoning || "Forensic telemetry mapped gateway status to standardized taxonomy."}&rdquo;
               </p>
             </div>
           </div>
 
           {/* Step 3: Strategist Expected Value */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D7] mb-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#202522] text-[#FFD45C] flex items-center justify-center font-bold text-xs shadow-2xs">
                   3
                 </span>
-                <span className="font-bold text-sm text-slate-900">Agent: Strategist (Expected Financial Yield Ranking)</span>
+                <span className="font-bold text-sm text-[#202522]">Agent: Strategist (Expected Financial Yield Ranking)</span>
               </div>
-              <span className="text-xs text-slate-400">E[V] Optimization</span>
+              <span className="text-xs text-[#777B76] font-medium">E[V] Optimization</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase font-semibold">
+                  <tr className="border-b border-[#E6E1D7] text-[#777B76] uppercase font-semibold">
                     <th className="pb-2">Action Option</th>
                     <th className="pb-2">P(Recovery)</th>
                     <th className="pb-2">Intervention Cost</th>
@@ -366,22 +366,22 @@ export default function CaseDetailPage() {
                     <th className="pb-2 text-right">Selection</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E6E1D7]/60">
                   {caseData.candidate_actions.map((act) => {
                     const isSelected = act.action_type === caseData.selected_action;
                     return (
-                      <tr key={act.action_type} className={isSelected ? "bg-blue-50/50 font-semibold" : ""}>
-                        <td className="py-2.5 font-medium text-slate-900">{act.action_type}</td>
-                        <td className="py-2.5 font-mono">{(act.recovery_probability * 100).toFixed(1)}%</td>
-                        <td className="py-2.5 font-mono text-slate-500">{formatCurrency(act.estimated_cost)}</td>
-                        <td className="py-2.5 font-mono text-emerald-600 font-bold">{formatCurrency(act.expected_value)}</td>
-                        <td className="py-2.5 text-right">
+                      <tr key={act.action_type} className={isSelected ? "bg-[#FFD45C]/15 font-semibold" : ""}>
+                        <td className="py-3 font-semibold text-[#202522]">{act.action_type}</td>
+                        <td className="py-3 font-mono text-[#202522]">{(act.recovery_probability * 100).toFixed(1)}%</td>
+                        <td className="py-3 font-mono text-[#777B76]">{formatCurrency(act.estimated_cost)}</td>
+                        <td className="py-3 font-mono text-[#16A36A] font-bold">{formatCurrency(act.expected_value)}</td>
+                        <td className="py-3 text-right">
                           {isSelected ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-                              <CheckCircle2 className="w-3 h-3 text-blue-600" /> Prescribed
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#202522] bg-[#FFD45C] px-2.5 py-0.5 rounded-md shadow-2xs">
+                              <CheckCircle2 className="w-3 h-3 text-[#202522]" /> Prescribed
                             </span>
                           ) : (
-                            <span className="text-[11px] text-slate-400">Alternative</span>
+                            <span className="text-[11px] text-[#777B76]">Alternative</span>
                           )}
                         </td>
                       </tr>
@@ -393,63 +393,63 @@ export default function CaseDetailPage() {
           </div>
 
           {/* Step 4: Deterministic Guardrail Checklist */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D7] mb-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#16A36A] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
                   4
                 </span>
-                <span className="font-bold text-sm text-slate-900">Deterministic Policy Guardrail Gate</span>
+                <span className="font-bold text-sm text-[#202522]">Deterministic Policy Guardrail Gate</span>
               </div>
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+              <span className="text-xs font-bold text-[#16A36A] bg-[#16A36A]/10 px-3 py-1 rounded-full border border-[#16A36A]/30 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" /> 100% Policy Compliant
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <span className="block text-slate-400 text-[10px] uppercase font-bold">Discount Rule</span>
-                <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Discount &le; 10.0%
+              <div className="p-3.5 rounded-xl bg-[#F5F2E9]/60 border border-[#E6E1D7]">
+                <span className="block text-[#777B76] text-[10px] uppercase font-bold">Discount Rule</span>
+                <span className="font-semibold text-[#202522] flex items-center gap-1.5 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16A36A]" /> Discount &le; 10.0%
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <span className="block text-slate-400 text-[10px] uppercase font-bold">Retry Cap</span>
-                <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Retries &lt; 3 Attempts
+              <div className="p-3.5 rounded-xl bg-[#F5F2E9]/60 border border-[#E6E1D7]">
+                <span className="block text-[#777B76] text-[10px] uppercase font-bold">Retry Cap</span>
+                <span className="font-semibold text-[#202522] flex items-center gap-1.5 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16A36A]" /> Retries &lt; 3 Attempts
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <span className="block text-slate-400 text-[10px] uppercase font-bold">Contact Cooldown</span>
-                <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Interval &ge; 8 Hours
+              <div className="p-3.5 rounded-xl bg-[#F5F2E9]/60 border border-[#E6E1D7]">
+                <span className="block text-[#777B76] text-[10px] uppercase font-bold">Contact Cooldown</span>
+                <span className="font-semibold text-[#202522] flex items-center gap-1.5 mt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16A36A]" /> Interval &ge; 8 Hours
                 </span>
               </div>
             </div>
           </div>
 
           {/* Step 5: Auditor & Cryptographic Ledger */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div className="bg-[#FFFDF8] border border-[#E6E1D7] rounded-[24px] p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D7] mb-3">
               <div className="flex items-center gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                <span className="w-7 h-7 rounded-xl bg-[#202522] text-[#FFD45C] flex items-center justify-center font-bold text-xs shadow-2xs">
                   5
                 </span>
-                <span className="font-bold text-sm text-slate-900">Agent: Auditor (SHA-256 Ledger Record)</span>
+                <span className="font-bold text-sm text-[#202522]">Agent: Auditor (SHA-256 Ledger Record)</span>
               </div>
-              <span className="text-xs text-slate-400 font-mono">Immutable Hash</span>
+              <span className="text-xs text-[#777B76] font-mono">Immutable Hash</span>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-900 text-slate-200 text-xs font-mono space-y-1">
-              <div className="flex justify-between">
-                <span className="text-slate-400">HASH:</span>
-                <span className="text-emerald-400 font-bold truncate max-w-sm">
+            <div className="p-4 rounded-xl bg-[#202522] text-[#FFFDF8] text-xs font-mono space-y-2 border border-[#202522]">
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                <span className="text-[#777B76]">HASH:</span>
+                <span className="text-[#16A36A] font-bold truncate max-w-sm">
                   {caseData.audit_trail?.[0]?.hash || "7f8a92b3c4d5e6f1a2b3c4d5e6f7a8b9"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">VERDICT:</span>
-                <span className="text-blue-400 font-bold">PASSED_POLICY_CHECK</span>
+                <span className="text-[#777B76]">VERDICT:</span>
+                <span className="text-[#FFD45C] font-bold">PASSED_POLICY_CHECK</span>
               </div>
             </div>
           </div>

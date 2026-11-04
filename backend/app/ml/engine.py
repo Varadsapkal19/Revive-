@@ -26,7 +26,7 @@ ACTION_METADATA = {
     "PAYMENT_LINK_WHATSAPP": {
         "cost": 3.0,  # WhatsApp business API delivery cost
         "channel": "WHATSAPP",
-        "description": "Interactive WhatsApp notification with 1-click Razorpay checkout"
+        "description": "Interactive WhatsApp notification with 1-click payment checkout"
     },
     "PAYMENT_LINK_EMAIL": {
         "cost": 0.5,  # Email delivery cost

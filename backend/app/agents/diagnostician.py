@@ -1,8 +1,10 @@
 """
 Agent 2: Diagnostician (Forensic Root Cause Analyst)
 Hybrid diagnostic engine: fast-path deterministic classifier + contextual LLM reasoning fallback.
+Includes strict prompt injection defense and input sanitization (Section 8 AI Security).
 """
 
+import re
 import httpx
 import logging
 from app.config import settings
@@ -11,13 +13,39 @@ from app.agents.state import RecoveryAgentState
 
 logger = logging.getLogger("revive.diagnostician")
 
+# Prompt injection filters
+INJECTION_PATTERNS = [
+    r"ignore\s+all\s+previous\s+instructions",
+    r"disregard\s+all\s+prior",
+    r"system\s*:",
+    r"<\|im_start\|>",
+    r"<\|im_end\|>",
+    r"\[inst\]",
+    r"admin\s+override",
+    r"grant\s+discount",
+    r"bypass\s+guardrails"
+]
+
+def sanitize_untrusted_text(text: str | None, max_len: int = 200) -> str:
+    """Sanitizes customer-controlled text before passing into model context."""
+    if not text:
+        return ""
+    clean = text.strip()
+    # Mask card numbers (13-19 digits)
+    clean = re.sub(r"\b(?:\d[ -]*?){13,19}\b", "[CARD_REDACTED]", clean)
+    # Filter prompt injection phrases
+    for pattern in INJECTION_PATTERNS:
+        clean = re.sub(pattern, "[UNTRUSTED_CONTENT_FILTERED]", clean, flags=re.IGNORECASE)
+    # Limit length
+    return clean[:max_len]
+
 class DiagnosticianAgent:
     name = "Diagnostician"
 
     @staticmethod
     async def process(state: RecoveryAgentState) -> RecoveryAgentState:
-        error_code = state.get("error_code")
-        error_description = state.get("error_description")
+        error_code = sanitize_untrusted_text(state.get("error_code"), 50)
+        error_description = sanitize_untrusted_text(state.get("error_description"), 150)
         customer_tier = state.get("customer_tier", "STANDARD")
         amount = state.get("amount", 0.0)
 
@@ -33,12 +61,12 @@ class DiagnosticianAgent:
             try:
                 async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT_SECONDS) as client:
                     prompt = (
-                        f"You are a FinOps payment failure analyst. Analyze this failure:\n"
-                        f"- Amount: {amount}\n"
-                        f"- Tier: {customer_tier}\n"
-                        f"- Error Code: {error_code}\n"
-                        f"- Error Description: {error_description}\n"
-                        f"Provide a 1-sentence diagnostic root cause summary."
+                        f"Context: FinOps payment failure diagnostic.\n"
+                        f"Amount: {float(amount)}\n"
+                        f"Tier: {customer_tier}\n"
+                        f"Error Code: {error_code}\n"
+                        f"Error Detail: {error_description}\n"
+                        f"Provide a single factual root cause sentence."
                     )
                     resp = await client.post(
                         f"{settings.OLLAMA_BASE_URL}/api/generate",
@@ -46,13 +74,14 @@ class DiagnosticianAgent:
                             "model": settings.OLLAMA_MODEL,
                             "prompt": prompt,
                             "stream": False,
-                            "options": {"num_predict": 60, "temperature": 0.2}
+                            "options": {"num_predict": 45, "temperature": 0.1}
                         }
                     )
                     if resp.status_code == 200:
                         llm_out = resp.json().get("response", "").strip()
-                        if llm_out:
-                            reasoning = f"[Cognitive LLM]: {llm_out}"
+                        # Sanitize LLM output
+                        if llm_out and not any(re.search(pat, llm_out, re.I) for pat in INJECTION_PATTERNS):
+                            reasoning = f"[Cognitive LLM]: {llm_out[:250]}"
                             confidence = min(0.98, confidence + 0.05)
             except Exception as e:
                 logger.debug(f"Ollama reasoning skipped/offline ({e}); using deterministic diagnosis.")

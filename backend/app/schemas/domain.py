@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Any
-from pydantic import BaseModel, Field
+from typing import Any, List, Optional
+from pydantic import BaseModel, Field, EmailStr
 
 # --- Event Schemas ---
 class EventIngestRequest(BaseModel):
@@ -82,6 +82,7 @@ class CaseDetailResponse(BaseModel):
 # --- Policy Schemas ---
 class MerchantPolicySchema(BaseModel):
     merchant_id: str = "default_merchant"
+    policy_version: int = 1
     max_retries: int = Field(default=3, ge=1, le=10)
     max_discount_pct: float = Field(default=10.0, ge=0.0, le=50.0)
     cooldown_hours: int = Field(default=8, ge=1, le=72)
@@ -124,6 +125,7 @@ class SimulatorRunResponse(BaseModel):
 # --- Audit & Metrics Schemas ---
 class AuditLogResponse(BaseModel):
     id: str
+    merchant_id: str
     case_id: str | None
     agent_name: str
     stage: str
@@ -150,6 +152,7 @@ class DashboardMetricsResponse(BaseModel):
 
 class ExperimentResponse(BaseModel):
     id: str
+    merchant_id: str
     name: str
     description: str | None
     baseline_action: str
@@ -165,10 +168,21 @@ class ExperimentResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Authentication Schemas ---
+# --- Authentication & Enterprise User Management Schemas ---
+class UserRegisterRequest(BaseModel):
+    email: str = Field(..., description="Corporate email address")
+    name: str = Field(..., min_length=2, max_length=100, description="Full name")
+    password: str = Field(..., min_length=12, description="Password (min 12 chars with complexity)")
+    merchant_name: Optional[str] = "Acme Payments Inc."
+    role: Optional[str] = "FINOPS_MANAGER"
+
 class LoginCredentialsRequest(BaseModel):
     login_id: str = Field(..., description="Email address or Merchant Login ID")
     password: str = Field(..., description="Account password")
+    totp_code: Optional[str] = Field(None, min_length=6, max_length=9, description="Optional 6-digit TOTP or backup code")
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 class PhoneOtpSendRequest(BaseModel):
     phone_number: str = Field(..., description="Mobile number with country code e.g. +91 98765 43210")
@@ -183,14 +197,34 @@ class GoogleAuthRequest(BaseModel):
     name: str
     avatar_url: str | None = None
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=12)
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=12)
+
+class MfaSetupResponse(BaseModel):
+    secret: str
+    provisioning_uri: str
+    recovery_codes: List[str]
+
+class MfaVerifyRequest(BaseModel):
+    code: str = Field(..., min_length=6, max_length=9)
+
 class UserProfile(BaseModel):
     id: str
     name: str
     email: str | None
     phone: str | None
     role: str
-    merchant_id: str | None = "MID_4821"
+    merchant_id: str
     auth_provider: str
+    mfa_enabled: bool = False
     avatar_url: str | None
 
     class Config:
@@ -198,5 +232,17 @@ class UserProfile(BaseModel):
 
 class AuthResponse(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"
+    mfa_required: bool = False
     user: UserProfile
+
+class UserSessionResponse(BaseModel):
+    id: str
+    ip_address: Optional[str]
+    user_agent: Optional[str]
+    created_at: datetime
+    is_active: bool
+
+    class Config:
+        from_attributes = True
